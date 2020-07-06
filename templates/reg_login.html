@@ -1,0 +1,127 @@
+{% extends 'layout.html' %}
+
+{% load static %}
+
+{% block title %} 登录/注册  {% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/rl_styles.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/rl_jigsaw.css' %}">
+{% endblock %}
+
+
+{% block main %}
+    <div class="jq22-container">
+        <div class="login-wrap">
+            <div class="login-html">
+
+                {# 登录注册切换按钮 #}
+                <input id="tab-1" type="radio" name="tab" class="sign-in" checked><label for="tab-1" class="tab">登录</label>
+                <input id="tab-2" type="radio" name="tab" class="sign-up" {% if reg %} checked {% endif %}><label for="tab-2" class="tab">注册</label>
+
+                <div class="login-form">
+
+                    {# 登录Form #}
+                    <form action="" method="post" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="page" value="login" > {# 用于判断是否为登录页面 #}
+                        <div class="sign-in-htm" style="margin-top: 40px;">
+                            <div class="group">
+                                <label for="user" class="label" id="label">{{ login_form.username.label }}</label>
+                                {{ login_form.username }}
+                                <span class="error" style="font-size: 14px" id="login_username_err">{{ login_form.username.errors.0 }}</span>
+                            </div>
+                            <div class="group">
+                                <label for="pass" class="label" id="label">{{ login_form.password.label }}</label>
+                                {{ login_form.password }}
+                                <span class="error" style="font-size: 14px" id="login_password_err">{{ login_form.password.errors.0 }}</span>
+                            </div>
+                            {# 滑块校验功能 #}
+{#                            <div class="group" id="login_verify">#}
+{#                                <div class="container">#}
+{#                                    <div id="captcha" style="position: relative" data-type="password"></div>#}
+{#                                    <div id="msg" style=""></div>#}
+{#                                </div>#}
+{#                            </div>#}
+                            <div class="group">
+                                {{ login_form.freeze_mode }}
+                                <label for="login_check"><span class="icon"></span>{{ login_form.freeze_mode.label }}</label>
+                            </div>
+                            <div class="group">
+                                <input type="submit" class="button" value="登录" id="login_btn" onClick="log_sub()">
+                            </div>
+
+                            <div class="error" style="font-size: 14px" id="login_err">{{ login_err }}</div>
+                            {% if reg_by %}
+                                <div class="group">
+                                    <div>注册用户成功：<span style="color: green;">{{ reg_by }}</span></div>
+                                </div>
+                            {% endif %}
+                            <div class="hr"></div>
+                            <div class="foot-lnk">
+                                <a href="{% url 'auth:is_freebds_root' %}" target="_blank">忘记密码?</a>
+                            </div>
+                        </div>
+                    </form>
+
+                    {# 注册Form #}
+                    <form action="" method="post" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="page" value="reg"> {# 用于判断是否为注册页面 #}
+                        <div class="sign-up-htm">
+                            <div class="group">
+                                <label for="user" class="label" id="label">{{ reg_form.username.label }}</label>
+                                {{ reg_form.username }}
+                                <span class="error" id="reg_username_err" style="font-size: 14px;">{{ reg_form.username.errors.0 }}</span>
+                            </div>
+                            <div class="group">
+                                <label for="blog_path" class="label" id="label">{{ reg_form.blog_path.label }}</label>
+                                {{ reg_form.blog_path }}
+                                <span class="error" style="font-size: 14px;">{{ reg_form.blog_path.errors.0 }}</span>
+                            </div>
+                            <div class="group">
+                                <label for="pass" class="label" id="label">{{ reg_form.password.label }}</label>
+                                {{ reg_form.password }}
+                                <span class="error" id="reg_password_err" style="font-size: 14px;">{{ reg_form.password.errors.0 }}</span>
+                                <span id="pwd_err"></span>
+                            </div>
+                            <div class="group">
+                                <label for="pass" class="label" id="label">{{ reg_form.re_password.label }}</label>
+                                {{ reg_form.re_password }}
+                                <span class="error" id="reg_re_password_err" style="font-size: 14px;">{{ reg_form.re_password.errors.0 }}</span>
+                            </div>
+                            <hr>
+
+                            {# 图片验证码 #}
+                            <div class="group" >
+                                <img src="data:image/jpng;base64,{{ captcha }}" alt="验证码" align="center">
+                                <a href="{% url 'auth:reg_login' %}?page=reg">刷新</a>
+                            </div>
+
+                            <div class="group">
+                                <label for="reg_captcha" class="label" id="label">请输入图片中的验证码：</label>
+                                <input type="text" name="captcha" maxlength="5" class="input" id="reg_captcha">
+                                <span class="error" id="reg_captcha_err" style="font-size: 14px;">{{ captcha_err }}</span>
+                            </div>
+                            <div class="group">
+                                <input type="submit" class="button" value="注册" onclick="reg_sub()" id="reg_btn">
+                            </div>
+{#                            <div class="hr"></div>#}
+{#                            <div class="foot-lnk">#}
+{#                                <label for="tab-1">已经用户?</label>#}
+{#                            </div>#}
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script src="{% static 'js/md5.js' %}"></script>  {# 一定要注意导入顺序，先导入插件 #}
+{#    <script src="{% static 'js/rl_jigsaw.js' %}"></script>#}
+    <script src="{% static 'js/rl_verify.js' %}"></script>
+{% endblock %}

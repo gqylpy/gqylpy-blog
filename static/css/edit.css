@@ -1,0 +1,244 @@
+.all {
+    margin: 0 auto;
+    width: 100%;
+    display: flex; /*设为 Flex 布局以后，子元素的float、clear和vertical-align属性将失效*/
+    display: -webkit-flex; /* Safari */
+    flex-direction: column; /*容器内项目的排列方向(默认横向排列 row)*/
+    flex-wrap: nowrap; /*容器内项目换行方式*/
+    justify-content: center; /*项目在主轴上的对齐方式*/
+    align-items: center; /*项目在交叉轴上如何对齐*/
+    align-content: center; /*定义了多根轴线的对齐方式。如果项目只有一根轴线，该属性不起作用*/
+}
+
+a {
+    color: rgb(51, 51, 51);
+    text-decoration: none;
+}
+
+a:hover {
+    color: rgb(51, 51, 51);
+    text-decoration: none;
+}
+
+a:active {
+    color: rgb(51, 51, 51);
+    text-decoration: none;
+}
+
+a:visited {
+    color: rgb(51, 51, 51);
+    text-decoration: none;
+}
+
+.down {
+    margin-top: 50px;
+}
+
+/* 旋转球 */
+canvas {
+    width: 90vmin;
+    height: 90vmin;
+}
+
+/* 文章管理表格 */
+#edit-table th, #edit-table td {
+    padding: 10px 15px;
+    text-align: center;
+}
+
+/* 文章标题 */
+.article-title a {
+    background-color: rgb(245, 246, 247);
+    color: rgb(51, 51, 51);
+    text-decoration: none;
+}
+
+.article-title a:hover {
+    color: rgb(51, 51, 51);
+    text-decoration: none;
+}
+
+.article-title a:active {
+    color: rgb(51, 51, 51);
+    text-decoration: none;
+}
+
+.article-title a:visited {
+    color: rgb(51, 51, 51);
+    text-decoration: none;
+}
+
+/* 编辑密码的div */
+#article-input-group {
+    width: 150px;
+}
+
+/* 密码编辑框 */
+.form-control-setpwd {
+    height: 22px;
+}
+
+/* (取消）提交密码按钮 */
+.save-article-pwd, .cancel-article-pwd {
+    padding: 0 3px;
+    color: grey;
+    background-color: rgb(245, 246, 247);
+}
+
+/* 密码和操作下的按钮 */
+.edit-pwd button, .operating-btn a, .operating-btn button {
+    color: grey;
+    background-color: rgb(245, 246, 247);
+}
+.edit-pwd button:hover, .operating-btn a:hover, .operating-btn button:hover {
+    color: black;
+}
+
+/* 删除按钮事件 */
+#delete-btn:hover {
+    color: red;
+}
+
+/* 分页按钮 */
+.pageing {
+    text-align: center;
+    margin-top: 0;
+}
+
+/* 评论管理表格 */
+#comment-table th, #comment-table td {
+    padding: 10px 15px;
+    text-align: center;
+}
+
+/* 评论操作按钮 */
+.comment-operating button {
+    color: grey;
+    background-color: rgb(245, 246, 247);
+}
+
+/* 评论者头像 */
+.observer img {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%; /* ○ */
+}
+
+/* 评论者昵称 */
+.observer a {
+    background-color: rgb(245, 246, 247);
+    text-decoration: none;
+}
+
+/* 被评文章 */
+.comment-article a {
+    background-color: rgb(245, 246, 247);
+    text-decoration: none;
+}
+
+/* 关注管理表格 */
+#attention-table th, #attention-table td {
+    padding: 10px 20px;
+    text-align: center;
+}
+
+.from_user a, .to_user a {
+    background-color: rgb(245, 245, 245);
+    text-decoration: none;
+}
+
+/* （被）关注者头像 */
+.from_user img, .to_user img {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+}
+
+/* 关注操作按钮 */
+.attention-operating button {
+    color: grey;
+    background-color: rgb(245, 246, 247);
+}
+
+/* 分类管理表格 */
+#classify-table th, #classify-table td {
+    padding: 10px 20px;
+    text-align: center;
+}
+
+/* 分类操作按钮 */
+.classify-btn button {
+    color: grey;
+    background-color: rgb(245, 246, 247);
+}
+
+/* 添加分类的输入框 */
+#add-classify-div {
+    float: right;
+    width: 200px;
+}
+
+.add-classify-box {
+    height: 30px;
+}
+
+
+/* 个人信息相关 */
+
+/* 用户头像 */
+.userinfo-avatar {
+    width: 100px;
+    height: 100px;
+    /*border-radius: 50%;*/
+}
+
+/* 每一个li标签 */
+.userinfo-ul li {
+    margin-bottom: 50px;
+    width: 500px;
+}
+
+/* 用户信息标识 */
+.userinfo-title {
+    color: gray;
+    margin-bottom: 20px;
+}
+
+.userinfo-info-div {
+    color: black;
+    padding-bottom: 5px;
+    border-bottom: 1px solid gray;
+}
+
+/* 编辑按钮 */
+.userinfo-btn {
+    float: right;
+    color: grey;
+    background-color: rgb(245, 246, 247);
+}
+
+/* 上传头像的按钮 */
+.userinfo-uploadimg-btn {
+    position: relative;
+    top: 80px;
+}
+
+/*编辑用户信息的输入框 */
+#article-input-group--set-nickname, #article-input-group--set-blog-path, #article-input-group--set-username, #article-input-group--set-email {
+    width: 200px;
+}
+.set-userinfo-box {
+    height: 24px;
+}
+
+.set-pwd-div {
+    position: relative;
+    bottom: 70px;
+    width: 170px;
+    float: right;
+}
+
+#old-pwd, #pwd, #re-pwd {
+    font-size: 3px;
+    height: 24px;
+}

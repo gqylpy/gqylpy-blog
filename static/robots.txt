@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /*?*
+Disallow: /auth
+Disallow: /home
+Disallow: /strive
+Disallow: /static
+Disallow: /edit-X
+Disallow: /xx-xx*
+
+sitemap: http://blog.gqylpy.com/sitemap.txt

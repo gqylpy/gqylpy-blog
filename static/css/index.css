@@ -1,0 +1,253 @@
+.all {
+    width: 1200px;
+    margin: 0 auto;
+    /*position: relative;  !*相对定位，方便于个人信息div定位*!*/
+}
+
+
+.left {
+    float: left;
+    width: 70%;
+    background-color: #EEE;
+}
+
+.article-title a {
+    color: #3d3d3d;
+    text-decoration: none;  /* 删除a标签默认的下划线 */
+}
+
+.article-title a:hover {
+    text-decoration: none;
+    margin-left: 3px;
+    transition: all 300ms linear;
+}
+
+/*点击时*/
+.article-title a:active {
+    text-decoration: none;
+}
+
+/*已访问*/
+.article-title a:visited {
+    text-decoration: none;
+}
+/* 用户信息 */
+.article-user-info {
+    float: right;
+}
+.user-avatar {
+    height: 23px;
+    width: 23px;
+    border-radius: 50%; /* ○ */
+    margin-right: 2px;
+}
+.user-nickname {
+    color: grey;
+    font-size: 13px;
+}
+
+.article-info {
+    color: #3d3d3d;
+    background-color: rgb(245, 246, 247);
+    margin-bottom: 5px;
+    overflow: hidden;  /*文字超出部分隐藏*/
+}
+
+.article-info:hover {
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    transform: translate3d(0, -1px, 0);
+    transition: all 300ms linear;
+}
+
+.article-title {
+    border-left: 5px solid gray;
+    padding: 15px 20px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.article-description {
+    margin-left: 20px;
+    padding-right: 20px;
+}
+
+/*圆圈字*/
+.article-type {
+    margin-top: 3px;
+    margin-right: 5px;
+    height: 21px;
+    width: 21px;
+    float: left;
+    text-align: center;  /* 文字居中 */
+    font-size: 12px;
+    padding-top: 2px;
+    padding-left: 1px;
+    font-weight: normal;
+    color: gray;
+    border-style: solid;  /* 边框类型 */
+    border-width: 1px;  /* 边框宽度 */
+    border-radius: 50%;
+}
+
+.bottom {
+    border-top: 1px solid #EEE;
+    margin: 0 20px;
+    padding: 10px 0;
+}
+
+.bottom > span {
+    font-size: 13px;
+    font-weight: normal;
+    margin: 0 7px;
+}
+
+/* 编辑按钮 */
+.bottom > a {
+    float: left;
+    font-size: 16px;
+    color: gray;
+    padding: 3px;
+    text-decoration: none;  /*删除a标签的下划线*/
+}
+.bottom > a:hover {
+    color: black;
+    font-size: 20px;
+    padding: 1px;
+    transition: all 100ms linear; /*执行操作延时*/
+}
+
+/* 分页按钮 */
+.pageing {
+    text-align: center;
+    margin-top: 0;
+}
+
+/* 锁 */
+.restrict {
+    float: right;
+    color: gray;
+    height: 100px;
+}
+
+/* 导航组件 */
+.left-top {
+    background-color: rgb(245, 246, 247);
+    margin-bottom: 5px;
+    padding-top: 0;
+    height: 36px;
+    text-align: center;
+}
+
+.left-top-hint {
+    position: relative;
+    top: 4px;
+    font-size: 20px;
+    color: gray;
+}
+
+#home-nav {
+    float: left;
+    background-color: rgb(245, 246, 247);
+    margin-bottom: 0;
+}
+
+.nav-all-article {
+    color: gray;
+}
+
+.nav-all-article:hover {
+    color: black;
+    transition: all 200ms linear; /*执行操作延时*/
+}
+
+.article-sort {
+    float: right;
+    margin-right: 8px;
+}
+
+.article-sort li {
+    text-align: center;
+    font-size: 14px;
+    float: right;
+    color: gray;
+    margin: 0 10px;
+    margin-top: 8px;
+}
+
+.sort-method:hover {
+    color: black;
+    transition: all 200ms linear; /*执行操作延时*/
+}
+
+.left-top-icon {
+    float: left;
+    font-size: 20px;
+    margin: 8px 10px;
+}
+
+
+/* --------- right --------- */
+
+.right {
+    float: right;
+    width: 28%;
+}
+
+/* ----- 总体分类 ----- */
+
+.right-article-type {
+    margin-top: 50px;
+    font-size: 15px;
+    color: gray;
+    width: 200px;
+}
+
+.right-article-all {
+    background-color: rgb(245, 246, 247);
+    text-align: center;
+    padding: 12px 0;
+    margin-bottom: 2px;
+    width: 220px;
+    margin-left: 68px;
+}
+
+.right-article-all:hover {
+    color: black;
+    font-size: 18px;
+    padding: 10px;
+    border-left: 2px solid gray;
+    border-right: 2px solid gray;
+    transition: all 100ms linear;
+}
+
+.right-article-type li {
+    background-color: rgb(245, 246, 247);
+    padding: 12px 0;
+    font-size: 15px;
+    text-align: center;
+    color: gray;
+    width: 120px;
+    margin-left: 118px;
+    margin-bottom: 2px;
+}
+
+.right-article-type li:hover {
+    color: black;
+    font-size: 18px;
+    padding: 10px;
+    border-left: 2px solid gray;
+    border-right: 2px solid gray;
+    transition: all 100ms linear;
+}
+
+/* ----- 其他信息 ----- */
+
+.other {
+    margin-left: 30px;
+    color: gray;
+    padding-left: 125px;
+    padding-right: 125px;
+    margin-top: 50px;
+    background-color: rgb(245, 246, 247);
+    height: 0;
+}

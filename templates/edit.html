@@ -1,0 +1,1593 @@
+{% extends 'layout.html' %}
+
+{% load static %}
+{% load filters %}
+
+
+{% block title %} 管理 {% endblock %}
+
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'z-bst-3.3.7/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'z-ft-as-4.7.0/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/edit-up.css' %}">
+    <link rel="stylesheet" href="{% static 'css/edit.css' %}">
+    <link rel="stylesheet" href="{% static 'css/cropper.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sitelogo.css' %}">
+
+    {# 不要试图改变这4个js文件的导入位置及顺序 #}
+{#     <script src="{% static 'js/jquery-1.10.2.min.js' %}"></script>#}
+    <script src="{% static 'z-bst-3.3.7/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/cropper.js' %}"></script>
+    <script src="{% static 'js/sitelogo.js' %}"></script>
+{% endblock %}
+
+
+{% block main %}
+    <div class="all" id="all">
+        <!--up start-->
+        <div class="up" id="up">
+            <div class="container">
+                <ul class="edit-menu">
+                    <li><a onClick="getArticleList('open')">文档管理</a>
+                        <ul class="submenu">
+                            <li><a onClick="getArticleList('open')">公开</a></li>
+                            <li><a onClick="getArticleList('private')">私密</a></li>
+                            <li><a onClick="getArticleList('draft')">草稿</a></li>
+                            <li><a onClick="getArticleList('delete')">回收站</a></li>
+                        </ul>
+                    </li>
+                    <li><a onClick="getCommentList('to_me')">评论管理</a>
+                        <ul class="submenu">
+                            <li><a onClick="getCommentList('to_me')">评论我的</a></li>
+                            <li><a onClick="getCommentList('me_to')">我评论的</a></li>
+                        </ul>
+                    </li>
+                    <li><a onClick="getAttentionList('to_me')">关注管理</a>
+                        <ul class="submenu">
+                            <li><a onClick="getAttentionList('to_me')">关注我的</a></li>
+                            <li><a onClick="getAttentionList('me_to')">我关注的</a></li>
+                        </ul>
+                    </li>
+                    <li><a onclick="getClassifyList()">分类管理</a></li>
+                    <li><a onClick="getUserInfo()">个人信息</a></li>
+                </ul>
+            </div>
+        </div>
+        <!--up over-->
+        {# 旋转球 #}
+        <canvas id="scene"></canvas>
+        <!--down start-->
+        <div class="down" id="down">
+            {# 文档管理的表格 #}
+            <table class="table table-striped table-hover" id="edit-table" style="display: none;">
+                <thead>
+                <tr>
+                    <th>文档</th>
+                    <th>类型</th>
+                    <th>分类</th>
+                    <th>阅读</th>
+                    <th>点赞</th>
+                    <th>评论</th>
+                    <th>日期</th>
+                    <th>密码</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="tbody">
+                </tbody>
+            </table>
+            {# 评论管理的表格 #}
+            <table class="table table-striped table-hover comment-table" id="comment-table" style="display: none">
+                <thead>
+                <tr>
+                    <th>评论者</th>
+                    <th>被评文档</th>
+                    <th>评论内容</th>
+                    <th>评论日期</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="comment-tbody">
+                </tbody>
+            </table>
+            {# 关注管理的表格 #}
+            <table class="table table-striped table-hover attention-table" id="attention-table" style="display: none">
+                <thead>
+                <tr>
+                    <th>关注者</th>
+                    <th>被关注者</th>
+                    <th>关注日期</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="attention-tbody"></tbody>
+            </table>
+            {# 分类管理的表格 #}
+            <table class="table table-striped table-hover attention-table" id="classify-table" style="display: none;">
+                <thead>
+                <tr>
+                    <th>分类</th>
+                    <th>文档数</th>
+                    <th>主页显示</th>
+                    <th>操作</th>
+                    <th>排序</th>
+                </tr>
+                </thead>
+                <tbody id="classify-tbody"></tbody>
+            </table>
+            {# 添加分类 #}
+            <div class="form-group form-inline" id="add-classify-div" style="display: none">
+                <label class="sr-only" for="add-classify"></label>
+                <div class="input-group">
+                    <input type="text" class="form-control add-classify-box" id="add-classify-box" placeholder="添加分类">
+                    <div class="input-group-addon  btn btn-default btn-xs" onClick="addClassify()">提交</div>
+                </div>
+            </div>
+            {# 分页按钮 #}
+            <div class="pageing" id="pageing"></div>
+            {# 个人信息 #}
+            <div id="userinfo" style="display: none;">
+                <ul class="userinfo-ul" type="none">
+                    <li>
+                        <div class="userinfo-title">头像</div>
+                        <div class="userinfo-info-div">
+                            <img class="userinfo-avatar" id="userinfo-avatar" src="" alt="用户头像">
+                            <button class="btn btn-default btn-xs userinfo-btn userinfo-uploadimg-btn" data-toggle="modal" data-target="#avatar-modal">修改</button>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="userinfo-title">昵称</div>
+                        <div class="userinfo-info-div" id="set-nickname-div">
+                            <span id="userinfo-nickname"></span>
+                            <button class="btn btn-default btn-xs userinfo-btn" id="set-nickname-btn" onClick="showSetNicknameBox()">修改</button>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="userinfo-title">主页地址</div>
+                        <div class="userinfo-info-div">
+                            <span id="userinfo-blog-path"></span>
+                            <button class="btn btn-default btn-xs userinfo-btn" id="set-blog-path-btn" onClick="showSetBlogPathBox()">修改</button>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="userinfo-title">用户名</div>
+                        <div class="userinfo-info-div">
+                            <span id="userinfo-username"></span>
+                            <button class="btn btn-default btn-xs userinfo-btn" id="set-username-btn" onClick="showSetUserNameBox()">修改</button>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="userinfo-title">密码</div>
+                        <div class="userinfo-info-div">
+                            <span>******</span>
+                            <button class="btn btn-default btn-xs userinfo-btn" id="set-user-pwd-btn" onClick="showSetUserPwdBox()">修改</button>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="userinfo-title">邮箱</div>
+                        <div class="userinfo-info-div">
+                            <span id="userinfo-email"></span>
+                            <button class="btn btn-default btn-xs userinfo-btn" id="set-email-btn" onClick="showSetEmailBox()">修改</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        {# 编辑头像的层叠窗口 #}
+        <div class="modal fade" id="avatar-modal" aria-hidden="true" aria-labelledby="avatar-modal-label" role="dialog"
+             tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <!--<form class="avatar-form" action="upload-logo.php" enctype="multipart/form-data" method="post">-->
+                    <form class="avatar-form">
+                        <div class="modal-header">
+                            <button class="close" data-dismiss="modal" type="button">&times;</button>
+                            <h4 class="modal-title" id="avatar-modal-label">上传图片</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="avatar-body">
+                                <div class="avatar-upload">
+                                    <input class="avatar-src" name="avatar_src" type="hidden">
+                                    <input class="avatar-data" name="avatar_data" type="hidden">
+                                    <label for="avatarInput" style="line-height: 35px;">图片上传</label>
+                                    <button class="btn btn-default" type="button" style="height: 35px;"
+                                            onClick="$('input[id=avatarInput]').click();">请选择图片
+                                    </button>
+                                    <span id="avatar-name"></span>
+                                    <input class="avatar-input hide" id="avatarInput" name="avatar_file" type="file">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-9">
+                                        <div class="avatar-wrapper"></div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="avatar-preview preview-lg" id="imageHead"></div>
+                                        <!--<div class="avatar-preview preview-md"></div>
+                                <div class="avatar-preview preview-sm"></div>-->
+                                    </div>
+                                </div>
+                                <div class="row avatar-btns">
+                                    <div class="col-md-4">
+                                        <div class="btn-group">
+                                            <button class="btn btn-default fa fa-undo" data-method="rotate"
+                                                    data-option="-90" type="button" title="Rotate -90 degrees"> 向左旋转
+                                            </button>
+                                        </div>
+                                        <div class="btn-group">
+                                            <button class="btn  btn-default fa fa-repeat" data-method="rotate"
+                                                    data-option="90" type="button" title="Rotate 90 degrees"> 向右旋转
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5" style="text-align: right;">
+                                        <button class="btn btn-default fa fa-arrows" data-method="setDragMode"
+                                                data-option="move" type="button" title="移动">
+							            <span class="docs-tooltip" data-toggle="tooltip" title=""
+                                              data-original-title="$().cropper(&quot;setDragMode&quot;, &quot;move&quot;)">
+							            </span>
+                                        </button>
+                                        <button type="button" class="btn btn-default fa fa-search-plus"
+                                                data-method="zoom" data-option="0.1" title="放大图片">
+							            <span class="docs-tooltip" data-toggle="tooltip" title=""
+                                              data-original-title="$().cropper(&quot;zoom&quot;, 0.1)">
+							              <!--<span class="fa fa-search-plus"></span>-->
+							            </span>
+                                        </button>
+                                        <button type="button" class="btn btn-default fa fa-search-minus"
+                                                data-method="zoom" data-option="-0.1" title="缩小图片">
+							            <span class="docs-tooltip" data-toggle="tooltip" title=""
+                                              data-original-title="$().cropper(&quot;zoom&quot;, -0.1)">
+							              <!--<span class="fa fa-search-minus"></span>-->
+							            </span>
+                                        </button>
+                                        <button type="button" class="btn btn-default fa fa-refresh" data-method="reset"
+                                                title="重置图片">
+                                            <span class="docs-tooltip" data-toggle="tooltip" title=""
+                                                  data-original-title="$().cropper(&quot;reset&quot;)"
+                                                  aria-describedby="tooltip866214"></span>
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-default btn-block avatar-save fa fa-save" type="button"
+                                                data-dismiss="modal"> 保存修改
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <span id="data-none" style="display: none;">无数据</span>
+        <!--down over-->
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script src="{% static 'js/edit-down-ball.js' %}"></script>
+    <script src="{% static 'js/msg_pop.js' %}"></script>
+    <script src="{% static 'js/md5.js' %}"></script>
+    <script src="{% static 'js/html2canvas.min.js' %}" charset="utf-8"></script>
+    <script src="{% static 'js/avatar_verify.js' %}"></script>
+    <script>
+        {# 上传头像的路径，在avatar_verify.js文件中会用到 #}
+        var uploadAvatarPATH = "{% url 'edit:upload_avatar' %}";
+
+        {# 旋转球 #}
+        var $scene = $('#scene');
+
+        {# 标记当前分页按钮执行的函数 #}
+        var getFunc;
+
+        {# 标记当前要获取的数据的类型 #}
+        var nowType;
+
+
+        {# ======== 操作按钮相关 ======== #}
+
+        {# 显示修改昵称的输入框 #}
+        function showSetNicknameBox() {
+            let oldNickname = $('#userinfo-nickname').text();
+            let label = `  {#  #}
+                <div class="input-group" id="article-input-group--set-nickname" style="float: right;">
+                    <input type="text" class="form-control form-control-setpwd set-userinfo-box" id="set-nickname-box" value="${oldNickname}">
+                    <div class="input-group-addon btn btn-default btn-xs save-article-pwd" onClick="submitNickname('${oldNickname}')"><span class="fa fa-check"></span></div>
+                    <div class="input-group-addon btn btn-default btn-xs cancel-article-pwd" onClick="cancelSetNickname()"><span class="fa fa-times"></span></div>
+                </div>
+            `;
+            $('#set-nickname-btn').replaceWith(label);
+        }
+
+
+        {# 显示修改主页地址的输入框 #}
+        function showSetBlogPathBox() {
+            let oldBlogPath = $('#userinfo-blog-path').text();
+            let label = `  {#  #}
+                <div class="input-group" id="article-input-group--set-blog-path" style="float: right;">
+                    <input type="text" class="form-control form-control-setpwd set-userinfo-box" id="set-blog-path-box" value="${oldBlogPath}">
+                    <div class="input-group-addon btn btn-default btn-xs save-article-pwd" onClick="submitBlogPath('${oldBlogPath}')"><span class="fa fa-check"></span></div>
+                    <div class="input-group-addon btn btn-default btn-xs cancel-article-pwd" onClick="cancelSetBlogPath()"><span class="fa fa-times"></span></div>
+                </div>
+            `;
+            $('#set-blog-path-btn').replaceWith(label);
+        }
+
+
+        {# 显示修改用户名的输入框 #}
+        function showSetUserNameBox() {
+            let oldUserName = $('#userinfo-username').text();
+            let label = `  {#  #}
+                <div class="input-group" id="article-input-group--set-username" style="float: right;">
+                    <input type="text" class="form-control form-control-setpwd set-userinfo-box" id="set-username-box" value="${oldUserName}">
+                    <div class="input-group-addon btn btn-default btn-xs save-article-pwd" onClick="submitUserName('${oldUserName}')"><span class="fa fa-check"></span></div>
+                    <div class="input-group-addon btn btn-default btn-xs cancel-article-pwd" onClick="cancelSetUserName()"><span class="fa fa-times"></span></div>
+                </div>
+            `;
+            $('#set-username-btn').replaceWith(label);
+        }
+
+
+        {# 显示修改用户密码的输入框 #}
+        function showSetUserPwdBox() {
+            label = `  {#  #}
+                <div class="set-pwd-div" id="set-pwd-div">
+                    <input type="password" class="form-control" id="old-pwd" placeholder="旧密码">
+                    <input type="password" class="form-control" id="pwd" placeholder="新密码">
+                    <input type="password" class="form-control" id="re-pwd" placeholder="确认密码">
+                    <button class="btn btn-default btn-xs userinfo-btn" onClick="cancelSetUserPwd()" style="margin-right: 45px;">取消</button>
+                    <button class="btn btn-default btn-xs userinfo-btn" onClick="submitUserPwd()" style="margin-right: 10px;">提交</button>
+                </div>
+            `;
+            $('#set-user-pwd-btn').replaceWith(label);
+        }
+
+
+        {# 显示修改邮箱的输入框 #}
+        function showSetEmailBox() {
+            let oldEmail = $('#userinfo-email').text();
+            if (oldEmail === '未设置') {
+                oldEmail = '';
+            }
+            let label = `  {#  #}
+                <div class="input-group" id="article-input-group--set-email" style="float: right;">
+                    <input type="text" class="form-control form-control-setpwd set-userinfo-box" id="set-email-box" value="${oldEmail}">
+                    <div class="input-group-addon btn btn-default btn-xs save-article-pwd" onClick="submitEmail('${oldEmail}')"><span class="fa fa-check"></span></div>
+                    <div class="input-group-addon btn btn-default btn-xs cancel-article-pwd" onClick="cancelSetEmail()"><span class="fa fa-times"></span></div>
+                </div>
+            `;
+            $('#set-email-btn').replaceWith(label);
+        }
+
+
+        {# 取消修改昵称 #}
+        function cancelSetNickname() {
+            $('#article-input-group--set-nickname').replaceWith(`<button class="btn btn-default btn-xs userinfo-btn" id="set-nickname-btn" onClick="showSetNicknameBox()">修改</button>`);
+        }
+
+
+        {# 取消修改主页地址 #}
+        function cancelSetBlogPath() {
+            $('#article-input-group--set-blog-path').replaceWith(`<button class="btn btn-default btn-xs userinfo-btn" id="set-blog-path-btn" onClick="showSetBlogPathBox()">修改</button>`);
+        }
+
+
+        {# 取消修改用户名 #}
+        function cancelSetUserName() {
+            $('#article-input-group--set-username').replaceWith(`<button class="btn btn-default btn-xs userinfo-btn" id="set-username-btn" onClick="showSetUserNameBox()">修改</button>`);
+        }
+
+
+        {# 取消修改用户密码 #}
+        function cancelSetUserPwd() {
+            $('#set-pwd-div').replaceWith(`<button class="btn btn-default btn-xs userinfo-btn" id="set-user-pwd-btn" onClick="showSetUserPwdBox()">修改</button>`);
+        }
+
+
+        {# 取消修改邮箱 #}
+        function cancelSetEmail() {
+            $('#article-input-group--set-email').replaceWith(`<button class="btn btn-default btn-xs userinfo-btn" id="set-email-btn" onClick="showSetEmailBox()">修改</button>`);
+        }
+
+
+        {# 提交新昵称 #}
+        function submitNickname(old_nickname) {
+            let $setNicknameBoxTag = $('#set-nickname-box');
+            let $nowDivTag = $('#article-input-group--set-nickname');
+            let newNickname = $setNicknameBoxTag.val();
+
+            {# 先定义好原始按钮 #}
+            let label = `<button class="btn btn-default btn-xs userinfo-btn" id="set-nickname-btn" onClick="showSetNicknameBox()">修改</button>`;
+
+            {# 校验 #}
+            if (newNickname === old_nickname) {
+                $nowDivTag.replaceWith(label);
+                return;
+            }
+            if (newNickname.length < 1) {
+                $setNicknameBoxTag.attr('placeholder', '不可为空');
+                return;
+            }
+
+            {# 提交 #}
+            $.ajax({
+                url: "{% url 'edit:set_nickname' %}",
+                type: 'PATCH',
+                data: {
+                    nickname: newNickname,
+                },
+                success: function (data) {
+                    if (data.status) {
+                        $('#userinfo-nickname').text(newNickname);
+                        $nowDivTag.replaceWith(label);
+                    } else {
+                        if (data.msg.nickname) {
+                            messagePop(data.msg.nickname);
+                        } else {
+                            messagePop('修改失败，请刷新页面后重试！');
+                        }
+                    }
+                }
+            })
+        }
+
+
+        {# 提交新主页地址 #}
+        function submitBlogPath(old_blog_path) {
+            let $setBlogPathBoxTag = $('#set-blog-path-box');
+            let $nowDivTag = $('#article-input-group--set-blog-path');
+            let newBlogPath = $setBlogPathBoxTag.val();
+            let label = `<button class="btn btn-default btn-xs userinfo-btn" id="set-blog-path-btn" onClick="showSetBlogPathBox()">修改</button>`;
+
+            if (newBlogPath === old_blog_path) {
+                $nowDivTag.replaceWith(label);
+                return;
+            }
+            if (newBlogPath.length < 1) {
+                $setBlogPathBoxTag.attr('placeholder', '不可为空');
+                return;
+            }
+
+            $.ajax({
+                url: "{% url 'edit:set_blog_path' %}",
+                type: 'PATCH',
+                data: {
+                    blog_path: newBlogPath,
+                },
+                success: function (data) {
+                    if (data.status) {
+                        $('#userinfo-blog-path').text(newBlogPath);
+                        $nowDivTag.replaceWith(label);
+                    } else {
+                        if (data.msg.blog_path) {
+                            messagePop(data.msg.blog_path);
+                        } else {
+                            messagePop('修改失败，请刷新页面后重试！');
+                        }
+                    }
+                }
+            })
+        }
+
+
+        {# 提交新用户名 #}
+        function submitUserName(old_username) {
+            let $setUserNameBoxTag = $('#set-username-box');
+            let $nowDivTag = $('#article-input-group--set-username');
+            let newUserName = $setUserNameBoxTag.val();
+            let label = `<button class="btn btn-default btn-xs userinfo-btn" id="set-username-btn" onClick="showSetUserNameBox()">修改</button>`;
+
+            if (newUserName === old_username) {
+                $nowDivTag.replaceWith(label);
+                return;
+            }
+            if (newUserName.length < 1) {
+                $setUserNameBoxTag.attr('placeholder', '不可为空');
+                return;
+            }
+
+            let confirmDelete = confirm(`确认修改登录用户名为：${newUserName}`);
+            if (!confirmDelete) {
+                return;
+            }
+
+            $.ajax({
+                url: "{% url 'edit:set_username' %}",
+                type: 'PATCH',
+                data: {
+                    username: newUserName,
+                },
+                success: function (data) {
+                    if (data.status) {
+                        $('#userinfo-username').text(newUserName);
+                        $nowDivTag.replaceWith(label);
+                        messagePop(`修改登录用户名成功：${newUserName}`);
+                    } else {
+                        if (data.msg.username) {
+                            messagePop(data.msg.username);
+                        } else {
+                            messagePop('修改失败，请刷新页面后重试！');
+                        }
+                    }
+                }
+            })
+        }
+
+
+        {# 提交用户新密码 #}
+        function submitUserPwd() {
+            let $oldPwdTag = $('#old-pwd');
+            let $pwdTag = $('#pwd');
+            let $rePwdTag = $('#re-pwd');
+            let oldPwd = $oldPwdTag.val();
+            let pwd = $pwdTag.val();
+            let rePwd = $rePwdTag.val();
+
+            {# 为空校验 #}
+            if (oldPwd.length < 1) {
+                $oldPwdTag.attr('placeholder', '不可为空');
+                return;
+            }
+            if (pwd.length < 1) {
+                $pwdTag.attr('placeholder', '不可为空');
+                return;
+            }
+            if (rePwd.length < 1) {
+                $rePwdTag.attr('placeholder', '不可为空');
+                return;
+            }
+
+            {# 最小位数校验 #}
+            if (pwd.length < 6) {
+                $pwdTag.val('');
+                $pwdTag.attr('placeholder', '密码至少6位');
+                return;
+            }
+
+            {# 一致性校验 #}
+            if (pwd  !== rePwd) {
+                $rePwdTag.val('');
+                $rePwdTag.attr('placeholder', '密码不一致');
+                return;
+            }
+
+
+            let confirmDelete = confirm('确认修改密码！');
+            if (!confirmDelete) {
+                return;
+            }
+
+            {# 提交 #}
+            $.ajax({
+                url: "{% url 'edit:set_user_pwd' %}",
+                type: 'PATCH',
+                data: {
+                    old_pwd: hex_md5(oldPwd),
+                    new_pwd: hex_md5(pwd),
+                },
+                success: function (data) {
+                    if (data.status) {
+                        $('#set-pwd-div').replaceWith(`<button class="btn btn-default btn-xs userinfo-btn" id="set-user-pwd-btn" onClick="showSetUserPwdBox()">修改</button>`);
+                        messagePop('修改成功，请重新登录');
+                        setTimeout(function () {
+                            location.href = "{% url 'auth:reg_login' %}";
+                        }, 2000)
+                    } else {
+                        if (data.msg.old_pwd) {
+                            messagePop(data.msg.old_pwd);
+                        } else if (data.msg.new_pwd) {
+                            messagePop(data.msg.new_pwd);
+                        } else {
+                            messagePop('修改失败，请刷新页面后重试！')
+                        }
+                    }
+                }
+            })
+        }
+
+
+        {# 提交新邮箱 #}
+        function submitEmail(old_email) {
+            let $setEmailBoxTag = $('#set-email-box');
+            let $nowDivTag = $('#article-input-group--set-email');
+            let newEmail = $setEmailBoxTag.val();
+            let label = `<button class="btn btn-default btn-xs userinfo-btn" id="set-email-btn" onClick="showSetEmailBox()">修改</button>`;
+
+            if(newEmail === old_email) {
+                $nowDivTag.replaceWith(label);
+                return;
+            }
+
+            if (newEmail.length < 1) {
+                $setEmailBoxTag.attr('placeholder', '不可为空');
+                return;
+            }
+
+            $.ajax({
+                url: "{% url 'edit:set_email' %}",
+                type: 'PATCH',
+                data: {
+                    email: newEmail,
+                },
+                success: function (data) {
+                    if (data.status) {
+                        $('#userinfo-email').text(newEmail);
+                        $nowDivTag.replaceWith(label);
+                    } else {
+                        if (data.msg.email) {
+                            messagePop(data.msg.email);
+                        } else {
+                            messagePop('修改失败，请刷新页面后重试！');
+                        }
+                    }
+                }
+            })
+        }
+
+
+        {# 显示回复评论的输入框 #}
+        function showReplyCommentBox(com_id, article_id, i) {
+            {# 获取当前所在的td标签 #}
+            let $nowTdTag = $(`#comment-operating-${i}`);
+            {# 先清空当前的标签 #}
+            $nowTdTag.html('');
+            {# 设置输入框 #}
+            let label = `  {#  #}
+                <div class="input-group" id="article-input-group">
+                    <input type="text" class="form-control form-control-setpwd" id="reply-comment-box-${i}">
+                    <div class="input-group-addon btn btn-default btn-xs save-article-pwd" onClick="submitReply(${com_id}, ${article_id}, ${i})"><span class="fa fa-check"></span></div>
+                    <div class="input-group-addon btn btn-default btn-xs save-article-pwd" onClick="cancelReply(${com_id}, ${article_id}, ${i})"><span class="fa fa-times"></span></div>
+                </div>
+            `;
+            {# 将设置好的输入框加入当前标签 #}
+            $nowTdTag.html(label);
+        }
+
+
+        {# 提交回复 #}
+        function submitReply(com_id, article_id, i) {
+            {# 获取当前所在的td标签 #}
+            let $nowTdTag = $(`#comment-operating-${i}`);
+
+            {# 获取当前的输入框 #}
+            let $replyCommentBoxTag = $(`#reply-comment-box-${i}`);
+
+            {# 提取回复内容 #}
+            let replyContent = $replyCommentBoxTag.val();
+
+            {# 内容不可为空 #}
+            if (replyContent.length < 1) {
+                $replyCommentBoxTag.attr('placeholder', '不可为空');
+                return;
+            }
+
+            {# 提交回复 #}
+            $.ajax({
+                url: "{% url 'home:comment' %}",
+                type: 'POST',
+                data: {
+                    com_id: com_id,
+                    article_id: article_id,
+                    com_content: replyContent,
+                },
+                success: function (data) {
+                    if (data) {
+                        $replyCommentBoxTag.val('');
+                        $replyCommentBoxTag.attr('placeholder', '回复成功');
+                        {# 设置评论操作按钮 #}
+                        let operatingBtn = `  {#  #}
+                            <button type="button" class="btn btn-default btn-xs" onClick="showReplyCommentBox(${com_id}, ${article_id}, ${i})">回</button>
+                            <button type="button" class="btn btn-default btn-xs" id="delete-btn" onClick="deleteComment(${com_id}, ${i})">删</button>
+                        `;
+                        {# 延迟1秒后执行 #}
+                        setTimeout(function () {
+                            {# 删除密码编辑框 #}
+                            $nowTdTag.html('');
+                            {# 将设置好的操作按钮添加到当前标签 #}
+                            $nowTdTag.append(operatingBtn);
+                        }, 1000);
+                    } else {
+                        $replyCommentBoxTag.val('');
+                        $replyCommentBoxTag.attr('placeholder', '回复失败请重试');
+                    }
+                }
+            })
+        }
+
+
+        {# 取消回复 #}
+        function cancelReply(com_id, article_id, i) {
+            {# 获取当前所在的td标签 #}
+            $(`#comment-operating-${i}`).html(`  {#  #}
+                <button type="button" class="btn btn-default btn-xs" onClick="showReplyCommentBox(${com_id}, ${article_id}, ${i})">回</button>
+                <button type="button" class="btn btn-default btn-xs" id="delete-btn" onClick="deleteComment(${com_id}, ${i})">删</button>
+            `);
+        }
+
+
+        {# 删除评论 #}
+        function deleteComment(com_id, i) {
+            let confirmDelete = confirm('确认删除该评论！');
+            if (confirmDelete) {
+                $.ajax({
+                    url: "{% url 'edit:delete_comment' %}",
+                    type: 'DELETE',
+                    data: {
+                        id: com_id,
+                    },
+                    success: function (data) {
+                        if (data.status) {
+                            {# 提示信息 #}
+                            $(`#comment-operating-${i}`).html(`<button type="button" class="btn btn-default btn-xs">已删除</button>`);
+                            {# 延迟1秒后执行 #}
+                            setTimeout(function () {
+                                $(`#tr-${i}`).html('');
+                            }, 1000)
+                        } else {
+                            messagePop('删除评论失败，请刷新页面后重试！');
+                        }
+
+                    }
+                })
+            }
+        }
+
+
+        {# 显示设置文档密码的输入框 #}
+        function showSetPwdBox(article_id, label_id, i) {
+            let $editPwdTag = $(`#${label_id}`);
+            {# 设置密码编辑框 #}
+            let label = `  {#  #}
+                <div class="input-group" id="article-input-group">
+                    <input type="text" class="form-control form-control-setpwd" id="pwd-box-${i}">
+                    <div class="input-group-addon btn btn-default btn-xs save-article-pwd" id="save-article-pwd-${i}" onClick="submitArticlePwd(${article_id}, '${label_id}', ${i})"><span class="fa fa-check"></span></div>
+                    <div class="input-group-addon btn btn-default btn-xs cancel-article-pwd" onClick="cancelSetPwd(${article_id}, '${label_id}', ${i})"><span class="fa fa-times"></span></div>
+                </div>
+            `;
+            {# 将设置好的密码编辑框加入该标签 #}
+            $editPwdTag.html(label);
+        }
+
+
+        {# 提交文档密码 #}
+        function submitArticlePwd(article_id, label_id, i) {
+            let $editPwdTag = $(`#${label_id}`);
+            let $pwdBoxTag = $(`#pwd-box-${i}`);
+
+            {# 提取输入的密码 #}
+            let pwd = $pwdBoxTag.val();
+
+            {# 密码不可为空 #}
+            if (pwd.length < 1) {
+                $pwdBoxTag.attr('placeholder', '不可为空');
+                return;
+            }
+
+            {# 提交密码 #}
+            $.ajax({
+                url: "{% url 'edit:set_article_pwd' %}",
+                type: 'PATCH',
+                data: {
+                    id: article_id,
+                    pwd: hex_md5(pwd),
+                },
+                success: function (data) {
+                    if (data.status) {
+                        $pwdBoxTag.val('');
+                        $pwdBoxTag.attr('placeholder', '修改成功');
+                        {# 设置密码操作按钮 #}
+                        let pwdBtn = `  {#  #}
+                            <button type="button" class="btn btn-default btn-xs" onClick="showSetPwdBox(${article_id}, '${label_id}', ${i})">改</button>
+                            <button type="button" class="btn btn-default btn-xs" onClick="deletePwd(${article_id}, 'edit-pwd-${i}', ${i})">删</button>
+                        `;
+                        {# 延迟1秒后执行 #}
+                        setTimeout(function () {
+                            {# 删除密码编辑框 #}
+                            $editPwdTag.html('');
+                            {# 将设置好的操作按钮添加到HTML #}
+                            $editPwdTag.append(pwdBtn);
+                        }, 1000);
+                    } else {
+                        $pwdBoxTag.val('');
+                        $pwdBoxTag.attr('placeholder', '提交失败请重试');
+                    }
+                }
+            });
+        }
+
+
+        {# 取消设置文档密码 #}
+        function cancelSetPwd(article_id, label_id, i) {
+            $(`#${label_id}`).html(`  {#  #}
+                <button type="button" class="btn btn-default btn-xs" onClick="showSetPwdBox(${article_id}, '${label_id}', ${i})">改</button>
+                <button type="button" class="btn btn-default btn-xs" onClick="deletePwd(${article_id}, 'edit-pwd-${i}', ${i})">删</button>
+            `);
+        }
+
+
+        {# 删除文档密码 #}
+        function deletePwd(article_id, label_id, i) {
+            let $editPwdTag = $(`#${label_id}`);
+            $.ajax({
+                url: "{% url 'edit:delete_article_pwd' %}",
+                type: 'DELETE',
+                data: {
+                    id: article_id,
+                },
+                success: function (data) {
+                    if (data.status) {
+                        $editPwdTag.html(`<button type="button" class="btn btn-default btn-xs" onClick="showSetPwdBox(${article_id},'${label_id}', ${i})">添加</button>`);
+                    }
+                }
+            })
+        }
+
+
+        {# 删除文档 #}
+        function deleteArticle(article_id, i) {
+            $.ajax({
+                url: "{% url 'edit:delete_article' %}",
+                type: 'DELETE',
+                data: {
+                    id: article_id,
+                },
+                success: function (data) {
+                    if (data.status) {
+                        {# 提示信息 #}
+                        $(`#operating-${i}`).html(`<button type="button" class="btn btn-default btn-xs">已删除</button>`);
+                        {# 延迟1秒后删除改行 #}
+                        setTimeout(function () {
+                            $(`#tr-${i}`).html('');
+                        }, 1000);
+                    } else {
+                        messagePop('删除文档失败，请刷新页面后重试！');
+                    }
+                }
+            })
+        }
+
+
+        {# 撤销删除的文档 #}
+        function recoverArticle(article_id, i) {
+            $.ajax({
+                url: "{% url 'edit:recover_article' %}",
+                type: 'PATCH',
+                data: {
+                    id: article_id,
+                },
+                success: function (data) {
+                    if (data.status) {
+                        $(`#operating-${i}`).html(`<button type="button" class="btn btn-default btn-xs">已恢复</button>`);
+                        {# 延迟1秒后删除改行 #}
+                        setTimeout(function () {
+                            $(`#tr-${i}`).html('');
+                        }, 1000);
+                    } else {
+                        messagePop('恢复文档失败，请刷新页面后重试！')
+                    }
+                }
+            })
+        }
+
+
+        {# 删除关注 #}
+        function deleteAttention(to_user_id, i) {
+            let confirmDelete = confirm('确认删除关注！');
+            if (confirmDelete) {
+                $.ajax({
+                    url: "{% url 'home:do_follow' %}",
+                    type: 'POST',
+                    data: {
+                        to_user: to_user_id,
+                    },
+                    success: function (data) {
+                        if (data.status && data.code === 0) {
+                            $(`#attention-operating-${i}`).html(`<button type="button" class="btn btn-default btn-xs">已删除</button>`);
+                            {# 延迟1秒后执行 #}
+                            setTimeout(function () {
+                                $(`#tr-${i}`).html(``);
+                            }, 1000);
+                        } else {
+                            messagePop("删除关注失败，请刷新页面后重试！")
+                        }
+                    }
+                })
+            }
+        }
+
+
+        {# 设置主页展示或隐藏分类 #}
+        function ShowOrConcealClassify(classify_id, is_show, i) {
+            $.ajax({
+                url: "{% url 'edit:show_or_conceal_classify' %}",
+                type: 'PATCH',
+                data: {
+                    id: classify_id,
+                    is_show: is_show,
+                },
+                success: function (data) {
+                    if (data.status) {
+                        {# 获取当前分类之前的状态（显示/隐藏） #}
+                        let classifyStatus = $(`#status-${i}`).attr('status');
+                        {# 如果之前是显示的则隐藏，反之 #}
+                        let isShowBtn;
+                        if (classifyStatus === '1') {
+                            isShowBtn = `<button class="btn btn-default btn-xs fa fa-times" id="status-${i}" status="0" onClick="ShowOrConcealClassify(${classify_id}, ${!is_show}, ${i})"></button>`;
+                        } else {
+                            isShowBtn = `<button class="btn btn-default btn-xs fa fa-check" id="status-${i}" status="1" onClick="ShowOrConcealClassify(${classify_id}, ${!is_show}, ${i})"></button>`;
+                        }
+                        $(`#status-td-${i}`).html(isShowBtn);
+                    } else {
+                        messagePop('操作失败，请刷新页面后重试！');
+                    }
+                }
+            })
+        }
+
+
+        {# 显示编辑分类名称的输入框 #}
+        function showEditClassifyBox(classify_id, classify_name, i) {
+            {# 获取当前编辑按钮所在的td #}
+            let $nowClassifyOperatingTag = $(`#classify-operating-${i}`);
+            {# 设置编辑框 #}
+            let label = `  {#  #}
+                <div class="input-group" id="article-input-group">
+                    <input type="text" class="form-control form-control-setpwd" id="set-classify-new-name-box-${i}" value="${classify_name}">
+                    <div class="input-group-addon btn btn-default btn-xs save-article-pwd" id="submit-classify-new-name-${i}" onClick="submitClassifyNewName(${classify_id}, ${i})"><span class="fa fa-check"></span></div>
+                    <div class="input-group-addon btn btn-default btn-xs save-article-pwd" onClick="cancelSetClassifyNewName(${classify_id}, '${classify_name}', ${i})"><span class="fa fa-times"></span></div>
+                </div>
+            `;
+            {# 将设置好编辑框添加到当前td #}
+            $nowClassifyOperatingTag.html(label);
+        }
+
+
+        {# 修改分类名称 #}
+        function submitClassifyNewName(classify_id, i) {
+            let $newClassifyOperatingTag = $(`#classify-operating-${i}`);
+            let $oldNameTag = $(`#classify-name-${i}`);
+            let $newNameTag = $(`#set-classify-new-name-box-${i}`);
+            {# 新名称 #}
+            let newName = $newNameTag.val();
+
+            {# 先准备好要恢复的按钮 #}
+            let operatingBtn = `  {#  #}
+                <button type="button" class="btn btn-default btn-xs" onClick="showEditClassifyBox(${classify_id}, '${newName}', ${i})">辑</button>
+                <button type="button" class="btn btn-default btn-xs" id="delete-btn" onClick="deleteClassify(${classify_id}, ${i})">删</button>
+            `;
+
+            {# 如果新名称与旧名称一致，则不向后端发请求 #}
+            if ($oldNameTag.text() === $newNameTag.val()) {
+                $newClassifyOperatingTag.html(operatingBtn);
+                return;
+            }
+
+            {# 名称不可为空 #}
+            if (newName.length < 1) {
+                $newNameTag.val('');
+                $newNameTag.attr('placeholder', '不可为空');
+                return;
+            }
+
+            {# 提交新名称 #}
+            $.ajax({
+                url: "{% url 'edit:alter_classify_name' %}",
+                type: 'PATCH',
+                data: {
+                    id: classify_id,
+                    name: newName,
+                },
+                success: function (data) {
+                    if (data.status) {
+                        $newNameTag.val('');
+                        $newNameTag.attr('placeholder', '修改成功');
+                        {# 延迟1秒后恢复操作按钮 #}
+                        setTimeout(function () {
+                            $oldNameTag.text(newName);
+                            $newClassifyOperatingTag.html(operatingBtn);
+                        }, 1000);
+                    } else {
+                        messagePop(`修改失败，${data.msg.name}`);
+                    }
+                }
+            })
+        }
+
+
+        {# 取消修改分类名称 #}
+        function cancelSetClassifyNewName(classify_id, classify_name, i) {
+            let operatingBtn = `  {#  #}
+                <button type="button" class="btn btn-default btn-xs" onClick="showEditClassifyBox(${classify_id}, '${classify_name}', ${i})">辑</button>
+                <button type="button" class="btn btn-default btn-xs" id="delete-btn" onClick="deleteClassify(${classify_id}, ${i})">删</button>
+            `;
+            $(`#classify-operating-${i}`).html(operatingBtn);
+        }
+
+
+        {# 删除分类 #}
+        function deleteClassify(classify_id, i, data_length) {
+            let confirmDelete = confirm('删除后不可恢复！');
+            if (!confirmDelete) {
+                return;
+            }
+            let $nowTrTag = $(`#tr-${i}`);
+            let $nowTdTag = $(`#classify-operating-${i}`);
+            $.ajax({
+                url: "{% url 'edit:delete_classify' %}",
+                type: 'DELETE',
+                data: {
+                    id: classify_id,
+                },
+                success: function (data) {
+                    if (data.status) {
+                        $nowTdTag.html(`<button type="button" class="btn btn-default btn-xs">已删除</button>`);
+                        {# 延迟一秒后清空该行 #}
+                        setTimeout(function () {
+                            {# 如果删除的第一个或最后一个分类，则刷新页面，避免排序按钮BUG #}
+                            if (i === 0 || i === data_length - 1) {
+                                getClassifyList();
+                            } else {
+                                $nowTrTag.html('');
+                            }
+                        }, 1000)
+                    } else {
+                        messagePop('删除分类失败，请刷新页面后重试！')
+                    }
+                }
+            })
+        }
+
+
+        {# 设置分类排序 #}
+        function moveClassify(classify_id, operation, i) {
+            $nowTbodyTag = $('#classify-tbody');
+            $nowTrTag = $(`#tr-${i}`);
+            $previousTrTag = $(`#tr-${i - 1}`);
+            $nextTrTag = $(`#tr-${i + 1}`);
+            $.ajax({
+                url: "{% url 'edit:set_classify_sort' %}",
+                type: 'PATCH',
+                data: {
+                    id: classify_id,
+                    ac: operation,
+                },
+                success: function (data) {
+                    if (data.status) {
+                        {# 中间变量 #}
+                        let nowTrHTML = $nowTrTag.html();
+                        if (operation === 'up') {  {# 升序 #}
+                            $nowTrTag.html($previousTrTag.html());
+                            $previousTrTag.html(nowTrHTML);
+                        } else {  {# 降序 #}
+                            $nowTrTag.html($nextTrTag.html());
+                            $nextTrTag.html(nowTrHTML);
+                        }
+                        {# 禁止点击文档管理<tbody>标签，在渲染分类列表时会解除禁用 #}
+                        $nowTbodyTag.css('pointer-events', 'none');
+                        {# 重新获取渲染分类列表 #}
+                        getClassifyList();
+                    } else {
+                        messagePop('操作失败，请刷新页面后重试！')
+                    }
+                }
+            })
+        }
+
+
+        {# 添加分类 #}
+        function addClassify() {
+            $addClassifyBoxTag = $('#add-classify-box');
+            let classifyName = $addClassifyBoxTag.val();
+            if (classifyName.length < 1) {
+                return;
+            }
+            $.ajax({
+                url: "{% url 'edit:add_classify' %}",
+                type: 'POST',
+                data: {
+                    name: classifyName,
+                },
+                success: function (data) {
+                    if (data.status) {
+                        $addClassifyBoxTag.val('');
+                        $addClassifyBoxTag.attr('placeholder', '提交成功');
+                        {# 延迟0.5秒后刷新页面 #}
+                        setTimeout(function () {
+                            getClassifyList();
+                        }, 500)
+                    } else {
+                        if (data.msg.name) {
+                            messagePop(data.msg.name);
+                        } else {
+                            messagePop('添加分类失败，请刷新页面后重试！')
+                        }
+                    }
+                }
+            })
+        }
+
+
+        {# ==================== 渲染页面相关 ==================== #}
+
+        {# 渲染文档列表 #}
+        function renderArticleList(data, ar_type) {
+            let $tbodyTag = $('#tbody');
+            let $editTableTag = $('#edit-table');
+            let $dataNone = $('#data-none');
+
+            {# 在渲染之前，隐藏其它标签，显示当前标签，并清空当前tbody #}
+            $scene.css('display', 'none');
+            $('#comment-table').css('display', 'none');
+            $('#attention-table').css('display', 'none');
+            $('#classify-table').css('display', 'none');
+            $('#add-classify-div').css('display', 'none');
+            $('#userinfo').css('display', 'none');
+            $dataNone.css('display', 'none');
+            $editTableTag.css('display', 'block');
+            $tbodyTag.html('');
+
+            {# 如果没有数据，则隐藏文档表格，目的是为了隐藏<thead>标签 #}
+            if (data.length < 1) {
+                $editTableTag.css('display', 'none');
+                $dataNone.css('display', 'block');
+                return;
+            }
+
+            {# 开始合成标签 #}
+            let allLabel = '';
+            for (let i = 0; i < data.length; i++) {
+                {# 判断该文档是否设置访问密码 #}
+                let pwdBtn;
+                if (data[i].access_pwd) {
+                    pwdBtn = `  {#  #}
+                        <button type="button" class="btn btn-default btn-xs" onClick="showSetPwdBox(${data[i].id}, 'edit-pwd-${i}', ${i})">改</button>
+                        <button type="button" class="btn btn-default btn-xs" onClick="deletePwd(${data[i].id}, 'edit-pwd-${i}', ${i})">删</button>
+                    `;
+                } else {
+                    pwdBtn = `<button type="button" class="btn btn-default btn-xs" onClick="showSetPwdBox(${data[i].id}, 'edit-pwd-${i}', ${i})">添加</button>`;
+                }
+
+                {# 判断当前的查询条件是否为已删除的文档 #}
+                let operatingBtn;
+                if (ar_type === 'delete') {
+                    operatingBtn = `<button type="button" class="btn btn-default btn-xs" onClick="recoverArticle(${data[i].id}, ${i})">恢复</button>`;
+                } else {
+                    operatingBtn = `  {#  #}
+                        <a href="{% url 'strive:strive' %}${data[i].id}" target="_blank" class="btn btn-default btn-xs">辑</a>
+                        <button type="button" class="btn btn-default btn-xs" id="delete-btn" onClick="deleteArticle(${data[i].id}, ${i})">删</button>
+                    `;
+                }
+
+                {# 生成每一行 #}
+                let everyLabel = `  {#  #}
+                    <tr id="tr-${i}">
+                        <td class="article-title"><a class="btn btn-default btn-xs" href="${data[i].blog_path}" target="_blank">${data[i].title}</a></td>
+                        <td>${data[i].type}</td>
+                        <td>${data[i].channel}</td>
+                        <td>${data[i].visit}</td>
+                        <td>${data[i].praise}</td>
+                        <td>${data[i].comment}</td>
+                        <td>${data[i].release_date}</td>
+                        <td class="edit-pwd" id="edit-pwd-${i}">${pwdBtn}</td>
+                        <td class="operating-btn" id="operating-${i}">${operatingBtn}</td>
+                    </tr>
+                `;
+
+                {# 合并每一行 #}
+                allLabel += everyLabel;
+            }
+            {# 将合并后的标签添加到HTML #}
+            $tbodyTag.html(allLabel);
+        }
+
+
+        {# 渲染评论列表 #}
+        function renderCommentList(data, com_type) {
+            let $comTableTag = $('#comment-table');
+            let $comTbodyTag = $('#comment-tbody');
+            let $dataNone = $('#data-none');
+
+            {# 在渲染之前，隐藏其它标签，显示当前标签，并清空当前tbody #}
+            $scene.css('display', 'none');
+            $('#edit-table').css('display', 'none');
+            $('#attention-table').css('display', 'none');
+            $('#classify-table').css('display', 'none');
+            $('#add-classify-div').css('display', 'none');
+            $('#userinfo').css('display', 'none');
+            $dataNone.css('display', 'none');
+            $comTableTag.css('display', 'block');
+            $comTbodyTag.html('');
+
+            {# 如果没有数据，则隐藏该评论表格 #}
+            if (data.length < 1) {
+                $comTableTag.css('display', 'none');
+                $dataNone.css('display', 'block');
+                return;
+            }
+
+            {# 开始合成标签 #}
+            let allLabel = '';
+            for (let i = 0; i < data.length; i++) {
+                {# 判断当前的查询条件 #}
+                let operatingBtn;
+                if (com_type === 'to_me') {
+                    operatingBtn = `  {#  #}
+                        <button type="button" class="btn btn-default btn-xs" onClick="showReplyCommentBox(${data[i].id}, ${data[i].blog}, ${i})">回</button>
+                        <button type="button" class="btn btn-default btn-xs" id="delete-btn" onClick="deleteComment(${data[i].id}, ${i})">删</button>
+                    `;
+                } else {
+                    operatingBtn = `<button type="button" class="btn btn-default btn-xs" id="delete-btn" onClick="deleteComment(${data[i].id}, ${i})">删</button>`
+                }
+
+                {# 生成每一行 #}
+                let everyLabel = `  {#  #}
+                    <tr id="tr-${i}">
+                        <td class="observer">
+                            <a class="btn btn-default btn-xs" href="${data[i].user_home}" target="_blank">
+                                <img src="${data[i].user_avatar}">
+                                <span>${data[i].user_nickname}</span>
+                            </a>
+                        </td>
+                        <td class="comment-article"><a class="btn btn-default btn-xs" href="${data[i].blog_path}" target="_blank">${data[i].article_title}</a></td>
+                        <td>${data[i].content}</td>
+                        <td>${data[i].comment_date}</td>
+                        <td class="comment-operating" id="comment-operating-${i}">${operatingBtn}</td>
+                    </tr>
+                `;
+
+                {# 合成每一行 #}
+                allLabel += everyLabel;
+            }
+            {# 将合并后的标签添加到HTML #}
+            $comTbodyTag.html(allLabel);
+        }
+
+
+        {# 渲染关注列表 #}
+        function renderAttentionList(data, at_type) {
+            let $attTableTag = $('#attention-table');
+            let $attTbodyTag = $('#attention-tbody');
+            let $dataNone = $('#data-none');
+
+            {# 在渲染之前，隐藏其它标签，显示当前标签，并清空当前tbody #}
+            $scene.css('display', 'none');
+            $('#edit-table').css('display', 'none');
+            $('#comment-table').css('display', 'none');
+            $('#classify-table').css('display', 'none');
+            $('#add-classify-div').css('display', 'none');
+            $('#userinfo').css('display', 'none');
+            $dataNone.css('display', 'none');
+            $attTableTag.css('display', 'block');
+            $attTbodyTag.html('');
+
+            {# 如果没有数据 #}
+            if (data.length < 1) {
+                $attTableTag.css('display', 'none');
+                $dataNone.css('display', 'block');
+                return;
+            }
+
+            {# 开始合成标签 #}
+            let allLabel = '';
+            for (let i = 0; i < data.length; i++) {
+                {# 判断当前的查询类型 #}
+                let operatingBtn;
+                if (at_type === 'to_me') {
+                    operatingBtn = `<button type="button" class="btn btn-default btn-xs"></button>`;
+                } else {
+                    operatingBtn = `<button type="button" class="btn btn-default btn-xs" id="delete-btn" onClick="deleteAttention(${data[i].to_user_id}, ${i})">删</button>`
+                }
+
+                {# 生成每一行 #}
+                let everyLabel = `  {#  #}
+                    <tr id="tr-${i}">
+                        <td class="from_user">
+                            <a class="btn btn-default btn-xs" href="${data[i].from_user_home}" target="_blank">
+                                <img src="${data[i].from_user_avatar}">
+                                <span>${data[i].from_user_nickname}</span>
+                            </a>
+                        </td>
+                        <td class="to_user">
+                            <a class="btn btn-default btn-xs" href="${data[i].to_user_home}" target="_blank">
+                                <img src="${data[i].to_user_avatar}">
+                                <span>${data[i].to_user_nickname}</span>
+                            </a>
+                        </td>
+                        <td>${data[i].attention_date}</td>
+                        <td class="attention-operating" id="attention-operating-${i}">${operatingBtn}</td>
+                    </tr>
+                `;
+
+                {# 合并每一行 #}
+                allLabel += everyLabel;
+            }
+            {# 将合并后的标签添加到HTML #}
+            $attTbodyTag.html(allLabel);
+        }
+
+
+        {# 渲染分类列表 #}
+        function renderClassifyList(data) {
+            $classifyTableTag = $('#classify-table');
+            $classifyTbodyTag = $('#classify-tbody');
+
+            {# 在渲染之前，隐藏其它标签，显示当前标签，并清空当前tbody #}
+            $scene.css('display', 'none');
+            $('#pageing').css('display', 'none');
+            $('#edit-table').css('display', 'none');
+            $('#comment-table').css('display', 'none');
+            $('#attention-table').css('display', 'none');
+            $('#add-classify-div').css('display', 'block');
+            $('#userinfo').css('display', 'none');
+            $('#data-none').css('display', 'none');
+            $classifyTableTag.css('display', 'block');
+            $classifyTbodyTag.html('');
+            {# 解除禁用点击，在设置分类排序函数中有禁用逻辑 #}
+            $classifyTbodyTag.css('pointer-events', '');
+
+            {# 如果没有数据，则隐藏文档表格，目的是为了隐藏<thead>标签 #}
+            if (data.length < 1) {
+                $classifyTableTag.css('display', 'none');
+                return;
+            }
+
+            {# 开始合成标签 #}
+            let allLabel = '';
+            for (let i = 0; i < data.length; i++) {
+                {# 判断该分类在主页是否展示 #}
+                let isShowBtn;
+                if (data[i].is_show) {
+                    isShowBtn = `<button class="btn btn-default btn-xs fa fa-check" id="status-${i}" status="1" onClick="ShowOrConcealClassify(${data[i].id}, ${data[i].is_show}, ${i})"></button>`;
+                } else {
+                    isShowBtn = `<button class="btn btn-default btn-xs fa fa-times" id="status-${i}" status="0" onClick="ShowOrConcealClassify(${data[i].id}, ${data[i].is_show}, ${i})"></button>`;
+                }
+
+                let moveBtn;
+                if (i === 0) {
+                    moveBtn = `<button type="button" class="btn btn-default btn-xs fa fa-angle-double-down" onClick="moveClassify(${data[i].id}, 'down', ${i})"></button>`;
+                } else if (i === data.length - 1) {
+                    moveBtn = `<button type="button" class="btn btn-default btn-xs fa fa-angle-double-up" onClick="moveClassify(${data[i].id}, 'up', ${i})"></button>`;
+                } else {
+                    moveBtn = `  {#  #}
+                        <button type="button" class="btn btn-default btn-xs fa fa-angle-double-up" onClick="moveClassify(${data[i].id}, 'up', ${i})"></button>
+                        <button type="button" class="btn btn-default btn-xs fa fa-angle-double-down" onClick="moveClassify(${data[i].id}, 'down', ${i})"></button>
+                    `;
+                }
+                {# 如果只有一个分类 #}
+                if (data.length === 1) {
+                    moveBtn = `<button type="button" class="btn btn-default" onClick=""></button>`;
+                }
+
+                {# 生成每一行 #}
+                let everyLabel = `  {#  #}
+                    <tr id="tr-${i}">
+                        <td id="classify-name-${i}">${data[i].name}</td>
+                        <td>${data[i].article_count}</td>
+                        <td class="classify-btn" id="status-td-${i}">${isShowBtn}</td>
+                        <td class="classify-btn" id="classify-operating-${i}">
+                            <button type="button" class="btn btn-default btn-xs" onClick="showEditClassifyBox(${data[i].id}, '${data[i].name}', ${i})">辑</button>
+                            <button type="button" class="btn btn-default btn-xs" id="delete-btn" onClick="deleteClassify(${data[i].id}, ${i}, ${data.length})">删</button>
+                        </td>
+                        <td class="classify-btn" id="classify-operating-btn-${i}">${moveBtn}</td>
+                    </tr>
+                `;
+
+                {# 合并每一行 #}
+                allLabel += everyLabel;
+            }
+            {# 将合并后的标签添加到HTML #}
+            $classifyTbodyTag.html(allLabel);
+        }
+
+
+        {# 渲染个人信息列表 #}
+        function renderUserInfoList(userinfo) {
+            let $userInfoTag = $('#userinfo');
+
+            {# 在渲染之前，隐藏其它标签，显示当前标签，并清空当前tbody #}
+            $scene.css('display', 'none');
+            $('#pageing').css('display', 'none');
+            $('#edit-table').css('display', 'none');
+            $('#comment-table').css('display', 'none');
+            $('#attention-table').css('display', 'none');
+            $('#add-classify-div').css('display', 'none');
+            $('#classify-table').css('display', 'none');
+            $userInfoTag.css('display', 'block');
+
+            $('#userinfo-avatar').attr('src', userinfo.avatar);
+            $('#userinfo-nickname').text(userinfo.nickname);
+            $('#userinfo-blog-path').text(userinfo.blog_path);
+            $('#userinfo-username').text(userinfo.username);
+            $('#userinfo-email').text(userinfo.email || '未设置');
+        }
+
+
+        {# 渲染分页按钮 #}
+        var renderPagination = function (data) {
+            let $Pageing = $('#pageing');
+            let prefiousUrl = data.previous_url;
+            let nextUrl = data.next_url;
+            let pageLinks = data.page_links;
+
+            {# 先清空分页按钮 #}
+            $Pageing.text('');
+
+            {# 如果没有或只有一页数据就不生成分页按钮则 #}
+            if (!pageLinks || pageLinks.length <= 1) {
+                return
+            }
+
+            $Pageing.css('display', 'block');
+
+            {# 准备ul列表 #}
+            let $prefiousUl = $('<ul>', {
+                class: 'pagination',
+                id: 'pagination',
+            });
+
+            {# 上一页 #}
+            let $prefiousA = $('<a>', {
+                text: '«',
+                url: prefiousUrl,
+                class: 'page',
+            });
+            let $prefiousLi = $('<li>', {
+                append: $prefiousA,
+            });
+            {# 如果没有上一页 #}
+            if (!prefiousUrl) {
+                $prefiousLi.attr('class', 'disabled');
+                $prefiousA.attr('at-page', 'yes');
+            }
+            $prefiousUl.append($prefiousLi);
+
+            {# 所有页码 #}
+            for (let i = 0; i < pageLinks.length; i++) {
+                let $pageA = $('<a>', {
+                    url: pageLinks[i][0],
+                    text: pageLinks[i][1],
+                    class: 'page',
+                });
+                let $pageLi = $('<li>', {
+                    append: $pageA,
+                });
+                {# 如果是当前页面 #}
+                if (pageLinks[i][2]) {
+                    $pageLi.attr('class', 'disabled');
+                    $pageA.attr('at-page', 'yes');
+                }
+                $prefiousUl.append($pageLi);
+            }
+
+            {# 下一页 #}
+            let $nextA = $('<a>', {
+                text: '»',
+                url: nextUrl,
+                class: 'page',
+            });
+            let $nextLI = $('<li>', {
+                append: $nextA
+            });
+            {# 如果没有下一页 #}
+            if (!nextUrl) {
+                $nextLI.attr('class', 'disabled');
+                $nextA.attr('at-page', 'yes');
+            }
+            $prefiousUl.append($nextLI);
+
+            {# 将组合好的分页按钮添加到HTML #}
+            $Pageing.append($prefiousUl);
+        };
+
+
+        {# ============================== 获取数据相关 ============================== #}
+
+        {# 指定分页获取数据 #}
+        $('#pageing').on('click', $('.page'), function (event) {
+            let target = $(event.target);
+            {# 如果不是当前页，则发起请求 #}
+            if (!target.attr('at-page') && !target.attr('id')) {
+                {# 开始获取文档 #}
+                getFunc(nowType, target.attr('url'));
+            }
+        });
+
+
+        {# 获取文档数据 #}
+        function getArticleList(type, page_url = "{% url 'edit:get_article_list' %}") {
+            nowType = type;
+            $.ajax({
+                url: page_url,
+                type: 'POST',
+                data: {
+                    type: type,
+                },
+                success: function (data) {
+                    if (data.data) {
+                        getFunc = getArticleList;
+                        renderArticleList(data.data.article_list, data.data.ar_type);
+                        renderPagination(data.data.html_context);
+                    }
+                }
+            })
+        }
+
+
+        {# 获取评论数据 #}
+        function getCommentList(type, page_url = "{% url 'edit:get_comment_list' %}") {
+            nowType = type;
+            $.ajax({
+                url: page_url,
+                type: 'POST',
+                data: {
+                    type: type,
+                },
+                success: function (data) {
+                    if (data.data) {
+                        getFunc = getCommentList;
+                        renderCommentList(data.data.comment_list, data.data.com_type);
+                        renderPagination(data.data.html_context);
+                    }
+                }
+            })
+        }
+
+
+        {# 获取关注数据 #}
+        function getAttentionList(type, page_url = "{% url 'edit:get_attention_list' %}") {
+            nowType = type;
+            $.ajax({
+                url: page_url,
+                type: 'POST',
+                data: {
+                    type: type,
+                },
+                success: function (data) {
+                    if (data.data) {
+                        getFunc = getAttentionList;
+                        renderAttentionList(data.data.attention_list, data.data.at_type);
+                        renderPagination(data.data.html_context);
+                    }
+                }
+            })
+        }
+
+
+        {# 获取分类数据 #}
+        function getClassifyList(page_url = "{% url 'edit:get_classify_list' %}") {
+            $.ajax({
+                url: page_url,
+                type: 'POST',
+                success: function (data) {
+                    if (data.data) {
+                        {#getFunc = getClassifyList;#}
+                        renderClassifyList(data.data.classify_list);
+                        {#renderPagination(data.data.html_context);#}
+                    }
+                }
+            })
+        }
+
+
+        {# 获取用户信息 #}
+        function getUserInfo() {
+            $.ajax({
+                url: "{% url 'edit:get_user_info' %}",
+                type: 'POST',
+                success: function (data) {
+                    if (data.data) {
+                        renderUserInfoList(data.data.userinfo)
+                    }
+                }
+            })
+        }
+
+
+        (function () {
+            {# 隐藏顶部的搜索按钮 #}
+            $('#search-box').css('display', 'none');
+        })();
+    </script>
+{% endblock %}

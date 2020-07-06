@@ -1,0 +1,458 @@
+{% extends 'layout.html' %}
+
+{% load static %}
+{% load filters %}
+
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+
+{% block main %}
+    <div class="all" id="all">
+        <!--left start-->
+        <div class="left" id="left">
+            {# 面包屑导航 #}
+            <div class="left-top" id="left-top">
+                <i class="fa fa-clock-o left-top-icon"></i>
+                <ol class="breadcrumb" id="home-nav"></ol>
+                {# 文档排序方式 #}
+                <ul type="none" class="article-sort">
+                    <li class="sort-method" id="visit" sort-method="visit">阅读量</li>
+                    <li class="sort-method" id="release_date" sort-method="release_date" style="color: black;">发布日期（默）</li>
+                    <li>排序：</li>
+                </ul>
+            </div>
+            {# 文档列表 #}
+            <div class="article-list" id="article-list"></div>
+            {# 分页按钮 #}
+            <div class="pageing" id="pageing"></div>
+        </div>
+        <!--left over-->
+
+        <!--right start-->
+        <div class="right" id="right">
+            <div class="user-info">
+                <div class="user-main-info">
+                    <a class="btn btn-default user-info-button" id="user-info-button"></a>
+                    <img class="user-avatar" id="user-avatar" src="">
+                    <span class="user-nickname" id="user-nickname"></span>
+                </div>
+                <hr class="hr-">
+                <div class="user-other-info">
+                    <ul type="none">
+                        <li>文档</li>
+                        <li id="article-count"></li>
+                    </ul>
+                    <ul type="none">
+                        <li>粉丝</li>
+                        <li id="bean-count"></li>
+                    </ul>
+                    <ul type="none">
+                        <li>评论</li>
+                        <li id="comment-count"></li>
+                    </ul>
+                    <ul type="none">
+                        <li>点赞</li>
+                        <li id="praise-count"></li>
+                    </ul>
+                    <ul type="none">
+                        <li>访客</li>
+                        <li id="visitor-count"></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="article-classify" id="article-classify">
+                <div class="classify-title">个人分类</div>
+                <ul type="none" class="classify-list" id="classify-list">
+                </ul>
+            </div>
+            <div class="other" id="other"></div>
+        </div>
+        <!--right over-->
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+
+        {# 排序方式 #}
+        var sortMethodS = 'release_date';
+
+        {# 分类id #}
+        var classifyIdS = null;
+
+
+        {# 渲染左侧页面之文档列表 #}
+        var renderLeftPage = function (data, self_) {
+            let $leftTag = $('#article-list');
+
+            {# 在渲染之前，先清空左侧页面 #}
+            $leftTag.text('');
+
+            {# 生成文档列表 #}
+            for (let i = 0; i < data.length; i++) {
+                {# 标题相关 #}
+                let $restrictAccess = data[i]['restrict_access'];
+                let $titleLinkA = $('<a>', {
+                    href: data[i]['blog_path'] + '?from=home',
+                    target: '_blank',
+                    text: data[i]['title'], {# decodeURI：URL解码 #}
+                });
+                let $titleArticleTypeSpan = $('<span>', {
+                    class: 'article-type',
+                    text: data[i]['type'],
+                });
+                let $articleTitleDiv = $('<div>', {
+                    class: 'article-title',
+                    append: [$titleLinkA, $titleArticleTypeSpan],
+                });
+
+                {# 如果有访问密码 #}
+                if ($restrictAccess) {
+                    let $restrictAccessSpan = $('<span>', {
+                        class: "fa fa-lock restrict",
+                    });
+                    $articleTitleDiv.append($restrictAccessSpan);
+                }
+
+                {# 文档描述相关 #}
+                if ($restrictAccess) {
+                    var $articleDescription = '......';
+                } else {
+                    var $articleDescription = data[i]['description'];
+                }
+                let $articleDescriptionP = $('<p>', {
+                    text: $articleDescription,
+                });
+                let $articleDescriptionDiv = $('<div>', {
+                    class: 'article-description',
+                    append: $articleDescriptionP,
+                });
+
+                {# 文档其它信息 #}
+                let $articleReleaseDateSpan = $('<span>', {
+                    {# 发布日期 #}
+                    text: '发布日期：' + data[i]['release_date'],
+                });
+                let $CommentNumberSpan = $('<span>', {
+                    text: '评：' + data[i]['comment_number'], {# 评论量 #}
+                });
+                let $articlePraiseSpan = $('<span>', {
+                    {# 点赞量 #}
+                    text: '赞：' + data[i]['praise'],
+                });
+                let $articleVisitSpan = $('<span>', {
+                    {# 阅读量 #}
+                    text: '阅：' + data[i]['visit'],
+                });
+                if (self_) {  {# 判断访问者是否为本人 #}
+                    var $editArticleI = $('<a>', {
+                        class: 'fa fa-pencil-square-o',
+                        href: '{% url 'strive:strive' %}' + data[i]['id'],
+                        target: '_blank'
+                    });
+                }
+                let $articleOtherInfoDiv = $('<div>', {
+                    class: 'bottom',
+                    append: [$articleReleaseDateSpan, $CommentNumberSpan, $articlePraiseSpan, $articleVisitSpan, $editArticleI]
+                });
+
+                {# 完美组合 #}
+                let $articleInfoDiv = $('<div>', {
+                    class: 'article-info',
+                    append: [$articleTitleDiv, $articleDescriptionDiv, $articleOtherInfoDiv] {# 在此标签内添加上面新建的标签，添加多个子标签用元组 #}
+                });
+
+                {# 添加到HTML #}
+                $leftTag.append($articleInfoDiv);
+
+                {# 获取左侧页面的高度，并设置到右侧页面 #}
+                $('#other').css('height', $leftTag.outerHeight(true) - 460);
+            }
+        };
+
+
+        {# 渲染左侧页面之分页按钮 #}
+        var renderPagination = function (data) {
+            let $Pageing = $('#pageing');
+            let prefiousUrl = data.previous_url;
+            let nextUrl = data.next_url;
+            let pageLinks = data.page_links;
+
+            {# 先清空分页按钮 #}
+            $Pageing.text('');
+
+            {# 如果没有或只有一页数据就不生成分页按钮则 #}
+            if (!pageLinks || pageLinks.length <= 1) {
+                return
+            }
+
+            {# 准备ul列表 #}
+            let $prefiousUl = $('<ul>', {
+                class: 'pagination',
+                id: 'pagination',
+            });
+
+            {# 上一页 #}
+            let $prefiousA = $('<a>', {
+                text: '«',
+                url: prefiousUrl,
+                class: 'page',
+            });
+            let $prefiousLi = $('<li>', {
+                append: $prefiousA,
+            });
+            {# 如果没有上一页 #}
+            if (!prefiousUrl) {
+                $prefiousLi.attr('class', 'disabled');
+                $prefiousA.attr('at-page', 'yes');
+            }
+            $prefiousUl.append($prefiousLi);
+
+            {# 所有页码 #}
+            for (let i = 0; i < pageLinks.length; i++) {
+                let $pageA = $('<a>', {
+                    url: pageLinks[i][0],
+                    text: pageLinks[i][1],
+                    class: 'page',
+                });
+                let $pageLi = $('<li>', {
+                    append: $pageA,
+                });
+                {# 如果是当前页面 #}
+                if (pageLinks[i][2]) {
+                    $pageLi.attr('class', 'disabled');
+                    $pageA.attr('at-page', 'yes');
+                }
+                $prefiousUl.append($pageLi);
+            }
+
+            {# 下一页 #}
+            let $nextA = $('<a>', {
+                text: '»',
+                url: nextUrl,
+                class: 'page',
+            });
+            let $nextLI = $('<li>', {
+                append: $nextA
+            });
+            {# 如果没有下一页 #}
+            if (!nextUrl) {
+                $nextLI.attr('class', 'disabled');
+                $nextA.attr('at-page', 'yes');
+            }
+            $prefiousUl.append($nextLI);
+
+            {# 将组合好的分页按钮添加到HTML #}
+            $Pageing.append($prefiousUl);
+        };
+
+
+        {# 指定排序方式获取文档 #}
+        $('.article-sort').click($('.sort-method'), function (event) {
+            let target = $(event.target);
+            let sortMethod = target.attr('sort-method');
+            if (sortMethod !== undefined) {
+                sortMethodS = sortMethod;
+                getArticleList();
+                {# 替换其样式 #}
+                $('.sort-method').css('color', 'gray');
+                target.css('color', 'black');
+            }
+        });
+
+
+        {# 指定分页获取文档 #}
+        $('#pageing').on('click', $('.page'), function (event) {
+            let target = $(event.target);
+            {# 如果不是当前页，则发起请求 #}
+            if (!target.attr('at-page') && !target.attr('id')) {
+                pageUrl = target.attr('url');
+                getArticleList(pageUrl)
+            }
+        });
+
+
+        {# 点击面包屑导航条时获取所有文档，并删除面包屑导航条 #}
+        $('#home-nav').on('click', $('#nav-all-article'), function () {
+            classifyIdS = null;
+            getArticleList();
+            {# $(this) 即：$('#home-nav') #}
+            $(this).text('');
+        });
+
+
+        {# 渲染右侧页面之用户信息 #}
+        var renderRightPageUserInfo = function (data, self_) {
+            let $userAvatar = $('#user-avatar');
+
+            {# 设置网页标题名称 #}
+            let $title = $('title');
+            $title.text(data['nickname'] + $title.text());
+
+            {# 管理 or 关注 #}
+            if (self_) {
+                $UserInfoButtonTag.text('管理');
+                $UserInfoButtonTag.attr('href', '{% url "edit:edit" %}');
+                $UserInfoButtonTag.attr('key', 0);
+                {# 0：标记为管理按钮 #}
+            } else {
+                if (data['is_attention']) {
+                    $UserInfoButtonTag.text('已关注');
+                } else {
+                    $UserInfoButtonTag.text('关注');
+                }
+                $UserInfoButtonTag.attr('key', 1);
+                {# 1：标记为关注按钮 #}
+            }
+
+            $('#user-nickname').text(data['nickname']);
+            $userAvatar.attr('src', data['avatar']);
+            $userAvatar.css('display', 'block');
+            {# 显示头像 #}
+            $('#article-count').text(data['article_count']);
+            $('#bean-count').text(data['bean_count']);
+            $('#comment-count').text(data['comment_count']);
+            $('#praise-count').text(data['praise_count']);
+            $('#visitor-count').text(data['visit_count']);
+        };
+
+
+        {# 渲染右侧页面之个人分类 #}
+        var renderRightPagePerClass = function (data, self_) {
+
+            {# 如果没有分类 #}
+            if (data.length === 0) {
+                $('#article-classify').text('');
+            }
+
+            {# 开始渲染分类 #}
+            for (let i = 0; i < data.length; i++) {
+                let $classifyNameSpan = $('<span>', {
+                    {# 分类名称span #}
+                    text: data[i]['name'],
+                    classifyid: data[i]['id'],
+                    classifyname: data[i]['name'],
+                });
+                let $classifyArticleCountSpan = $('<span>', {
+                    {# 文档数量span #}
+                    text: String(data[i]['article_count']) + '篇',
+                    class: 'classify-article-number',
+                    classifyid: data[i]['id'],
+                    classifyname: data[i]['name'],
+                });
+                let $classifyListLi = $('<li>', {
+                    {# 分类列表li #}
+                    class: 'classify-each',
+                    {# 伪属性 #}
+                    classifyid: data[i]['id'],
+                    classifyname: data[i]['name'],
+                    append: [$classifyNameSpan, $classifyArticleCountSpan],
+                });
+                {# 如果是最后一个分类，则添加一个id #}
+                if (i + 1 === data.length) {
+                    $classifyListLi.attr('id', 'classify-last')
+                }
+                $('#classify-list').append($classifyListLi);
+                {# 添加到现有标签 #}
+            }
+        };
+
+
+        {# 指定分类获取文档，并生成面包屑导航条 #}
+        $('#classify-list').on('click', $('.classify-each'), function (event) {
+            let target = $(event.target);
+            let $homeNavTag = $('#home-nav');
+            {# 获取伪属性中的值 #}
+            let classifyId = target.attr('classifyid');
+            classifyIdS = classifyId;
+            getArticleList();
+            $homeNavTag.text('');
+            let $allArticleLi = $('<li>', {
+                class: 'nav-all-article',
+                id: 'nav-all-article',
+                text: '全部文档'
+            });
+            let $classifyNameLi = $('<li>', {
+                class: 'active',
+                {# 分类名称 #}
+                text: target.attr('classifyname'),
+            });
+            $homeNavTag.append($allArticleLi, $classifyNameLi);
+        });
+
+
+        {# 关注用户的逻辑 #}
+        let $UserInfoButtonTag = $('#user-info-button');
+        $UserInfoButtonTag.click(function () {
+            {# 是关注按钮时才会执行 #}
+            if (Number($UserInfoButtonTag.attr('key'))) {
+                let $beanCountTag = $("#bean-count");
+                $.ajax({
+                    url: '{% url "home:do_follow" %}',
+                    type: 'POST',
+                    data: {
+                        to_user: '{{ user_id }}',
+                    },
+                    success: function (data) {
+                        if (data.status) {
+                            $UserInfoButtonTag.text(data.msg);
+                            if (data.code) {
+                                $beanCountTag.text(Number($beanCountTag.text()) + 1);
+                            } else {
+                                $beanCountTag.text(Number($beanCountTag.text()) - 1);
+                            }
+                        } else {
+                            location.href = '{% url "auth:reg_login" %}{{ request|next_url }}'
+                        }
+                    }
+                })
+            }
+        });
+
+        {# 获取用户信息 #}
+        var getUserInfo = function () {
+            $.ajax({
+                url: "{% url 'home:get_userinfo' %}",
+                type: 'POST',
+                data: {
+                    user_id: "{{ user_id }}",
+                },
+                success: function (data) {
+                    renderRightPageUserInfo(data['userinfo'], data['self']);
+                    renderRightPagePerClass(data['classify_list'], data['self_']);
+                }
+            })
+        };
+
+
+        {# 获取文档列表 #}
+        var getArticleList = function (page_url = "{% url 'home:get_article_list' %}") {
+            $.ajax({
+                url: page_url,
+                type: 'POST',
+                data: {
+                    user_id: "{{ user_id }}",
+                    classify_id: classifyIdS,
+                    sort_method: sortMethodS,
+                },
+                success: function (data) {
+                    renderLeftPage(data['article_list'], data['self']);
+                    renderPagination(data['html_context']);
+                }
+            })
+        };
+
+
+        {#利用js闭包形式，将js代码嵌入body，便会自动执行 #}
+        (function () {
+            if ({{ user_id|default:0 }}) {
+                getArticleList();
+                getUserInfo();
+            }
+        })(jQuery);
+    </script>
+{% endblock %}

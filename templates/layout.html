@@ -1,0 +1,172 @@
+{# 这个是模板文件 #}
+
+{% load static %}
+{% load filters %}
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="content-Type" charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name=viewport content="user-scalable=no,width=device-width,initial-scale=1,maximum-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge，chrome=1">
+
+    <link rel="icon" href="/favicon.ico">
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'z-bst-3.3.7/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'z-ft-as-4.7.0/css/font-awesome.min.css' %}">
+
+    <title>{% block title %} {# 标题 #} {% endblock %} {{ site_name }}</title>
+    {% block css %} {# CSS样式 #} {% endblock %}
+
+</head>
+<body id="body">
+
+<div class="layout-top">
+    <nav class="layout_top">
+
+        {# logo #}
+        <div class="nav-logo">
+            <a href="{% url 'index' %}">{{ layout_title }}</a>
+            <img class="loading-X" id="loading" src="{% static 'img/loading.gif' %}" style="display: none;">
+        </div>
+
+        {# 控制menu #}
+        <div class="nav-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        {# 菜单 #}
+        <ul class="nav-list">
+            <li><a href="{% url 'index' %}" class="btn btn-default btn-lg">首页</a></li>
+            <li class="search">
+                <div class="form-group form-inline" id="search-box" style="margin: 0 20px;">
+                    <label class="sr-only" for="exampleInputAmount"></label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="exampleInputAmount"
+                               placeholder="{% if search_global %}搜全站{% else %}搜此用户文档{% endif %}">
+                        <div class="input-group-addon" id="input-group-addon" onClick="searchArticle()"><span
+                                class="fa fa-search"></span></div>
+                    </div>
+                </div>
+            </li>
+            <li><a href="{% url 'strive:strive' %}" target="_blank"><span class="fa fa-pencil-square"></span>写文档</a>
+            </li>
+            <li>
+                <a href="{% if request.user.is_authenticated %}/{{ request.user.blog_path }}{% else %}{% url 'auth:reg_login' %}{{ request|next_url }}{% endif %}"><span
+                        class="fa fa-home"></span>主页</a></li>
+
+            {% if request.user.is_authenticated %}  {# 判断当前用户是否通过了认证 #}
+                <li>
+                    <a href="/{{ request.user.blog_path }}/" id="user-avatar-a-tag"><img src="{{ request|user_avatar }}"
+                                                                                         class="photo"></a>
+                    <div class="carect"></div>
+                    <ul class="menu">
+                        <li><a href="{% url 'edit:edit' %}">管理中心</a></li>
+                        <li><a href="/{{ request.user.blog_path }}/">我的主页</a></li>
+                        <li><a href="{% url 'auth:logout' %}{{ request|next_url }}">退出</a></li>
+                    </ul>
+                </li>
+            {% else %}
+                <li><a href="{% url 'auth:reg_login' %}{{ request|next_url }}">登录／注册</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+
+{% csrf_token %}
+
+<script src="{% static 'js/jqr-3.3.1.js' %}"></script>
+<script src="{% static 'js/layout.js' %}"></script>
+
+{% block main %} {# 页面内容 #} {% endblock %}
+
+<script>
+    {#获取隐藏inpout中的csrftoken值 #}
+    var csrfToken = $("[name='csrfmiddlewaretoken']").val();
+
+    {# 标识当前页面是否为 show_article.html 页面，进行模糊查询时会用到 #}
+    var showArticlePage = false;
+
+    {# 加载动画 #}
+    var $loadingTag = $('#loading');
+
+
+    {#在所有的ajax请求中的headers中添加csrfToken #}
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {  {# ajax请求发起前的动作 #}
+            xhr.setRequestHeader('X-CSRFToken', csrfToken);
+            $loadingTag.css('display', 'block');
+        },
+        complete: function () {  {# ajax请求结束后的动作 #}
+            $loadingTag.css('display', 'none');
+        }
+    });
+
+
+    {# 模糊查询 #}
+
+    function searchArticle() {
+        {# 搜索的关键字 #}
+        let keyword = $('#exampleInputAmount').val();
+        {# 如果关键字为空 #}
+        if (!keyword) {
+            return
+        }
+        $.ajax({
+            url: "{% url 'home:search_article' %}",
+            type: 'POST',
+            data: {
+                user_id: {{ user_id|default:0 }},
+                keyword: keyword,
+            },
+            success: function (data) {
+                if (data.data.length > 0) {
+                    {# 清空左侧页面 #}
+                    $('#left-top').text('');
+                    $('#pagination').text('');
+                    {# 如果当前页面为查看文档页面，则显示右侧页面信息 #}
+                    if (showArticlePage) {
+                        displayRightPage();
+                    }
+                    renderLeftPage(data.data, data.self);
+                } else {
+                    $('#exampleInputAmount').val('无匹配文档');
+                }
+
+            }
+        })
+    }
+
+
+    (function () {
+        {# 30分钟后刷新页面，目的是为了刷新CSRFToken值 #}
+        var refreshPage = v => location.reload();
+        setTimeout(refreshPage, 1800000)
+    })();
+</script>
+
+{# 主动向百度提交当前页面链接 #}
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+
+{% block js %} {# js代码 #} {% endblock %}
+</body>
+</html>

@@ -1,0 +1,294 @@
+.all {
+    width: 1200px;
+    margin: 0 auto;
+    /*position: relative;  !*相对定位，方便于个人信息div定位*!*/
+}
+
+
+.left {
+    float: left;
+    width: 70%;
+    background-color: #EEE;
+}
+
+.article-title a {
+    color: #3d3d3d;
+    text-decoration: none;  /* 删除a标签默认的下划线 */
+}
+
+.article-title a:hover {
+    text-decoration: none;
+    margin-left: 3px;
+    transition: all 300ms linear;
+}
+
+/*点击时*/
+.article-title a:active {
+    text-decoration: none;
+}
+
+/*已访问*/
+.article-title a:visited {
+    text-decoration: none;
+}
+
+.article-info {
+    color: #3d3d3d;
+    background-color: rgb(245, 246, 247);
+    margin-bottom: 5px;
+    overflow: hidden;  /*文字超出部分隐藏*/
+}
+
+.article-info:hover {
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    transform: translate3d(0, -1px, 0);
+    transition: all 300ms linear;
+}
+
+.article-title {
+    border-left: 5px solid gray;
+    padding: 15px 20px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.article-description {
+    margin-left: 20px;
+    padding-right: 20px;
+}
+
+/*圆圈字*/
+.article-type {
+    margin-top: 3px;
+    margin-right: 5px;
+    height: 21px;
+    width: 21px;
+    float: left;
+    text-align: center;  /* 文字居中 */
+    font-size: 12px;
+    padding-top: 2px;
+    padding-left: 1px;
+    font-weight: normal;
+    color: gray;
+    border-style: solid;  /* 边框类型 */
+    border-width: 1px;  /* 边框宽度 */
+    border-radius: 50%;
+}
+
+.bottom {
+    border-top: 1px solid #EEE;
+    margin: 0 20px;
+    padding: 10px 0;
+}
+
+.bottom > span {
+    font-size: 13px;
+    font-weight: normal;
+    margin: 0 7px;
+}
+
+/* 编辑按钮 */
+.bottom > a {
+    float: left;
+    font-size: 16px;
+    color: gray;
+    padding: 3px;
+    text-decoration: none;  /*删除a标签的下划线*/
+}
+.bottom > a:hover {
+    color: black;
+    font-size: 20px;
+    padding: 1px;
+    transition: all 100ms linear; /*执行操作延时*/
+}
+
+/* 分页按钮 */
+.pageing {
+    text-align: center;
+    margin-top: 0;
+}
+
+/* 锁 */
+.restrict {
+    float: right;
+    color: gray;
+    height: 100px;
+}
+
+/* 导航组件 */
+.left-top {
+    background-color: rgb(245, 246, 247);
+    margin-bottom: 5px;
+    padding-top: 0;
+    height: 36px;
+    text-align: center;
+}
+
+.left-top-hint {
+    position: relative;
+    top: 4px;
+    font-size: 20px;
+    color: gray;
+}
+
+#home-nav {
+    float: left;
+    background-color: rgb(245, 246, 247);
+    margin-bottom: 0;
+}
+
+.nav-all-article {
+    color: gray;
+}
+
+.nav-all-article:hover {
+    color: black;
+    transition: all 200ms linear; /*执行操作延时*/
+}
+
+.article-sort {
+    float: right;
+    margin-right: 8px;
+}
+
+.article-sort li {
+    text-align: center;
+    font-size: 14px;
+    float: right;
+    color: gray;
+    margin: 0 10px;
+    margin-top: 8px;
+}
+
+.sort-method:hover {
+    color: black;
+    transition: all 200ms linear; /*执行操作延时*/
+}
+
+.left-top-icon {
+    float: left;
+    font-size: 20px;
+    margin: 8px 10px;
+}
+
+
+/* ----- 用户信息 ----- */
+
+.right {
+    float: right;
+    width: 28%;
+}
+
+/*.right {*/
+    /*position: absolute;*/
+    /*width: 310px;*/
+    /*right: 0;*/
+/*}*/
+
+/* 用户信息 */
+.user-info {
+    background-color: rgb(245, 246, 247);
+    height: 130px;
+}
+
+/* 用户主要信息 */
+.user-main-info {
+    height: 55px;
+}
+
+/* 关注按钮 */
+.user-info-button {
+    margin-top: 21px;
+    margin-left: 27px;
+    color: gray;
+    background-color: rgb(245, 246, 247);
+}
+
+/* 用户昵称 */
+.user-nickname {
+    float: right;
+    font-size: 17px;
+    font-weight: bold;
+    margin-top: 27px;
+    margin-right: 10px;
+}
+
+/* 用户头像 */
+.user-avatar {
+    float: right;
+    margin-top: 10px;
+    margin-right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%; /* ○ */
+    display: none; /*隐藏头像*/
+}
+
+.hr- {
+    margin: 20px 0 5px 0;
+}
+
+/*用户其它信息*/
+.user-other-info ul {
+    margin-top: 5px;
+    width: 61px;
+    text-align: center;
+    float: left;
+    font-size: 12px;
+    color: gray;
+}
+
+/* ----- 个人分类 ----- */
+
+/*整体*/
+.article-classify {
+    margin-top: 20px;
+}
+
+/*分类标题*/
+.classify-title {
+    background-color: rgb(245, 246, 247);
+    padding: 10px 0 5px 7px;
+    font-size: 16px;
+    border-left: 3px solid gray;
+    overflow: hidden; /*文字超出部分隐藏*/
+}
+
+.classify-list li {
+    background-color: rgb(245, 246, 247);
+    padding: 5px 15px;
+    font-size: 16px;
+    color: gray;
+}
+
+.classify-list li:hover {
+    color: black;
+    transition: all 100ms linear; /*执行操作延时*/
+}
+
+.classify-list li:active {
+    padding: 5px 21px;
+    transition: all 50ms linear; /*执行操作延时*/
+}
+
+.classify-article-number {
+    float: right;
+    font-size: 13px;
+    text-align: center;
+}
+
+#classify-last {
+    padding-bottom: 10px;
+    border-bottom: 2px dotted gray;
+}
+
+/* ----- 其他信息 ----- */
+
+.other {
+    color: gray;
+    padding-left: 125px;
+    padding-right: 125px;
+    margin-top: 50px;
+    background-color: rgb(245, 246, 247);
+    height: 0;
+}
