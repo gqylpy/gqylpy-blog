@@ -11,10 +11,10 @@ from config.settings import WLMJ_VISIT_LINK
 from config.settings import WLMJ_USER
 from config.settings import WLMJ_PAYMENT_LINK
 
-_wlmj = WLMJ_CONTENT % ({
-    'wlmj_visit_link': WLMJ_VISIT_LINK,
-    'wlmj_payment_link': WLMJ_PAYMENT_LINK
-})
+# _wlmj = WLMJ_CONTENT % ({
+#     'wlmj_visit_link': WLMJ_VISIT_LINK,
+#     'wlmj_payment_link': WLMJ_PAYMENT_LINK
+# })
 
 
 class ArticleInfoSerializer(serializers.ModelSerializer):
