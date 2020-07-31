@@ -9,7 +9,7 @@
 #body, html {
     /*overflow: hidden;  !*这会将body内所有信息隐藏*!*/
     height: 100%;
-    background-color: rgb(238, 238, 238);  /*全站背景颜色*/
+    background-color: rgb(238, 238, 238); /*全站背景颜色*/
 }
 
 .container-fluid {
@@ -33,7 +33,9 @@
 .slogan {
     width: 1300px;
     margin: 0 auto;
+    text-align: center
 }
+
 .layout-top {
     background-color: white;
     width: 100%;
@@ -99,7 +101,7 @@ nav .nav-list {
         height: 100%;
         top: 0;
         padding-top: 10px;
-        width: 91px;  /*左侧菜单列表宽度*/
+        width: 91px; /*左侧菜单列表宽度*/
         background: #fff;
         left: -60%;
         -webkit-transition: 1s;
@@ -198,7 +200,8 @@ nav .nav-menu {
     cursor: pointer;
 }
 
-@media (max-width: 1120px) {  /*浏览器宽度小于1120px时触发*/
+@media (max-width: 1120px) {
+    /*浏览器宽度小于1120px时触发*/
     nav .nav-menu {
         display: block;
         float: left;
@@ -239,7 +242,7 @@ nav .open {
 .layout_top {
     background-color: white;
     color: gray;
-    margin-bottom: 10px;  /*顶部与主体的间距*/
+    margin-bottom: 10px; /*顶部与主体的间距*/
 }
 
 /* 头像 */
