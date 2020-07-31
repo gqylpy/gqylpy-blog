@@ -30,6 +30,10 @@
     display: inline-block;
 }
 
+.slogan {
+    width: 1300px;
+    margin: 0 auto;
+}
 .layout-top {
     background-color: white;
     width: 100%;
@@ -50,10 +54,6 @@ nav {
 nav li, nav a {
     text-decoration: none;
     list-style: none;
-}
-
-#layout_title {
-    font-size: 20px;
 }
 
 nav .nav-logo {
