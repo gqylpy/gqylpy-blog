@@ -94,7 +94,7 @@ class ArticleInfo(View):
             return render(request, 'show_article.html',
                           {'ar_content': ar_content, 'title': f'{ar_title} - {nickname}', 'user_id': user_id,
                            'article_id': article_id, 'blog_path': blog_path, 'site_name': SITE_NAME,
-                           'layout_title': ar_title or LAYOUT_TITLE, 'from_page': from_page})
+                           'layout_title': LAYOUT_TITLE, 'from_page': from_page})
 
         except Exception:
             return HttpResponse(json.dumps(ERROR_INFO, ensure_ascii=False))  # 这样写，便可显示中文

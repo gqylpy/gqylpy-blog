@@ -154,7 +154,7 @@ AUTH_USER_MODEL = 'user.UserProfile'
 
 STATIC_URL = '/static/'
 # STATIC_ROOT = r'Y:\static'
-STATIC_ROOT = '/data/hello_world/static/'
+STATIC_ROOT = '/data/gqylpy-blog/static/'
 
 STATICFILES_DIRS = [
     os.path.abspath(os.path.join(BASE_DIR, 'static'))

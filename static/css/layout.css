@@ -52,6 +52,10 @@ nav li, nav a {
     list-style: none;
 }
 
+#layout_title {
+    font-size: 20px;
+}
+
 nav .nav-logo {
     width: auto;
     height: 100%;
