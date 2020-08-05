@@ -353,11 +353,11 @@ class IndexArticleListView(APIView):
 
             # 获取文档列表
             if article_type:
-                article_list = models.BlogInfo.objects.filter(~Q(user_id=1), channel=article_type, is_private=False,
+                article_list = models.BlogInfo.objects.filter(channel=article_type, is_private=False,
                                                               is_draft=False, is_delete=False,
-                                                              access_password__isnull=True)
+                                                              access_password__isnull=True)  # # ~Q(user_id=1),
             else:
-                article_list = models.BlogInfo.objects.filter(~Q(user_id=1), is_private=False, is_draft=False,
+                article_list = models.BlogInfo.objects.filter(is_private=False, is_draft=False,
                                                               is_delete=False, access_password__isnull=True)
 
             # 3.对文档进行排序
