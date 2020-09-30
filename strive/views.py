@@ -2,6 +2,7 @@ import re
 import json
 import uuid
 from urllib import parse
+from datetime import datetime
 
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
@@ -113,7 +114,6 @@ class SaveArticle(View):
                     blog_obj = blog_obj_list.first()
                     models.Article.objects.filter(blog=id).update(markdown_content=markdown_content, content=content)
                     if not save_data['is_draft']:
-                        from datetime import datetime
                         models.BlogInfo.objects.filter(id=id).update(release_date=datetime.now())
                 else:
                     article_obj = models.Article.objects.create(markdown_content=markdown_content, content=content)
