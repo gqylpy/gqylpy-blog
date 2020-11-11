@@ -42,7 +42,7 @@ def home(request, blog_path):
 
 def index(request):
     """返回站点首页"""
-    # return redirect('http://www.gqylpy.com')
+    return redirect('http://www.gqylpy.com')
     if request.method == 'GET':
         local_title = None
         return render(request, 'index.html', {'article_type': BLOG_TYPE, 'search_global': True, 'site_name': SITE_NAME,
