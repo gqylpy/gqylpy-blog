@@ -173,7 +173,7 @@ LOGIN_URL = '/auth'
 
 MEDIA_URL = 'media/'  # 指定url路径
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # 指定媒体目录，用于存储上传的图片
-MEDIA_ROOT = '/data/hello_world/media'  # 指定媒体目录，用于存储上传的图片
+MEDIA_ROOT = '/data/gqylpy-blog/media'  # 指定媒体目录，用于存储上传的图片
 
 
 # ============================= Session配置 =============================
