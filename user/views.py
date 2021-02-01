@@ -39,7 +39,7 @@ class RegLogin(View):
     # 用户注册的逻辑
     def reg(self):
         # 先校验验证码是否正确
-        return HttpResponse("用户注册系统正在升级，暂不可使用。")
+        return HttpResponse("暂时开放，联系管理员：zhuyk4@lenovo.com")
         captcha = self.request.POST.get('captcha', False)
         if captcha != self.request.session.get('reg_captcha', None):
             return render(self.request, 'reg_login.html',
@@ -115,4 +115,4 @@ def is_user_exists(request):
 
 
 def freebsd_root(request):
-    return HttpResponse('遗忘密码，联系管理员邮箱：zhuyk4@lenovo.com')
+    return HttpResponse('遗忘密码，联系管理员：zhuyk4@lenovo.com')

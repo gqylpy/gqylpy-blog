@@ -79,7 +79,8 @@ class ArticleInfo(View):
                                                                                  :LAYOUT_TITLE_MAX_LENGTH] + '...'
 
             # 获取文档内容
-            ar_content = self.fetch_content(article_id, blog_path)
+            # ar_content = self.fetch_content(article_id, blog_path)
+            # 'ar_content': ar_content,
 
             # 如果访问者不是本人，则将访问量加1
             if not request.user.is_authenticated or not request.user.blog_path == blog_path or blog_path == 'aiops':
@@ -92,9 +93,9 @@ class ArticleInfo(View):
             # 但要注意的是：nowait=True 与 skip_locked=True 是互斥的，同时使用将抛出异常
 
             return render(request, 'show_article.html',
-                          {'ar_content': ar_content, 'title': f'{ar_title} - {nickname}', 'user_id': user_id,
+                          {'title': f'{ar_title} - {nickname}', 'user_id': user_id,
                            'article_id': article_id, 'blog_path': blog_path, 'site_name': SITE_NAME,
-                           'layout_title': ar_title or LAYOUT_TITLE, 'from_page': from_page})
+                           'layout_title': LAYOUT_TITLE, 'from_page': from_page})
 
         except Exception:
             return HttpResponse(json.dumps(ERROR_INFO, ensure_ascii=False))  # 这样写，便可显示中文
