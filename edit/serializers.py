@@ -277,7 +277,7 @@ class UserInfoSer(serializers.Serializer):
     email = serializers.EmailField(
         write_only=True,
         error_messages={
-            'invalid': '邮箱格错误',
+            'invalid': '邮箱格式错误',
         }
     )
 
